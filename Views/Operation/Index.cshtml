@@ -1,0 +1,135 @@
+﻿@model List<DMCPortal.Web.Models.Operation>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Operation Master</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center text-primary">Operation Master</h2>
+
+        <div id="errorDiv" class="alert alert-danger d-none"></div>
+
+        <div class="card shadow p-4 mb-5 bg-white rounded">
+            <form id="operationForm">
+                <input type="hidden" id="OperationId" value="0" />
+
+                <div class="mb-3">
+                    <label class="form-label">Operation Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="OperationName" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Operation Description</label>
+                    <input type="text" class="form-control" id="OperationDescription" />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="OperationIsActive" checked />
+                    <label class="form-check-label">Is Active?</label>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success px-4">Save</button>
+                </div>
+            </form>
+        </div>
+
+        <table class="table table-bordered table-hover text-center align-middle shadow-sm" id="operationTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Is Active</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            loadTable();
+
+            $('#operationForm').submit(function (e) {
+                e.preventDefault();
+                const operation = {
+                    OperationId: parseInt($('#OperationId').val()),
+                    OperationName: $('#OperationName').val().trim(),
+                    OperationDescription: $('#OperationDescription').val(),
+                    OperationIsActive: $('#OperationIsActive').is(':checked'),
+                    OperationCreatedOn: new Date().toISOString()
+                };
+
+                $.ajax({
+                    url: '/Operation/AddOrUpdate',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(operation),
+                    success: function () {
+                        $('#operationForm')[0].reset();
+                        $('#OperationId').val(0);
+                        $('#errorDiv').addClass('d-none');
+                        loadTable();
+                    },
+                    error: function (xhr) {
+                        $('#errorDiv').text(xhr.responseText).removeClass('d-none');
+                    }
+                });
+
+
+
+            });
+
+            function loadTable() {
+                $.get('/Operation/GetOperations', function (data) {
+                    let rows = '';
+                    $.each(data, function (i, op) {
+                        rows += `<tr>
+                                    <td>${op.operationId}</td>
+                                    <td>${op.operationName}</td>
+                                    <td>${op.operationDescription}</td>
+                                    <td>${op.operationIsActive ? 'Active' : 'Inactive'}</td>
+                                    <td>${new Date(op.operationCreatedOn).toLocaleDateString()}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary editBtn" data-id="${op.operationId}">Edit</button>
+                                        <button class="btn btn-sm btn-danger deleteBtn" data-id="${op.operationId}">Delete</button>
+                                    </td>
+                                </tr>`;
+                    });
+                    $('#operationTable tbody').html(rows);
+                });
+            }
+
+            $(document).on('click', '.editBtn', function () {
+                const id = $(this).data('id');
+                $.get(`/Operation/GetById/${id}`, function (op) {
+                    $('#OperationId').val(op.operationId);
+                    $('#OperationName').val(op.operationName);
+                    $('#OperationDescription').val(op.operationDescription);
+                    $('#OperationIsActive').prop('checked', op.operationIsActive);
+                });
+            });
+
+            $(document).on('click', '.deleteBtn', function () {
+                if (!confirm("Are you sure?")) return;
+                const id = $(this).data('id');
+                $.post(`/Operation/Delete/${id}`, function () {
+                    loadTable();
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

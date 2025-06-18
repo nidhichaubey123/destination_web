@@ -1,0 +1,780 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DMC Portal - User Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .top-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h5 {
+            margin: 0;
+            color: #0d6efd;
+        }
+
+        .header-left p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-icon {
+            position: relative;
+            color: #6c757d;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+            .notification-icon:hover {
+                color: #0d6efd;
+            }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            background-color: #0d6efd;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #ffffff;
+            border-right: 1px solid #dee2e6;
+            padding: 20px;
+        }
+
+            .sidebar a {
+                display: block;
+                padding: 12px 10px;
+                margin-bottom: 8px;
+                color: #000;
+                text-decoration: none;
+                border-radius: 8px;
+            }
+
+                .sidebar a.active, .sidebar a:hover {
+                    background-color: #e9ecef;
+                    font-weight: bold;
+                }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .card-counter {
+            padding: 20px;
+            border-radius: 12px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        /* New user card styling to match screenshot */
+        .user-card {
+            background-color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 30px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100px;
+        }
+
+        .user-info-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .user-initial {
+            background-color: #0d6efd;
+            color: #fff;
+            font-weight: bold;
+            font-size: 20px;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-name-text {
+            font-weight: 600;
+            color: #000;
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        .user-email {
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .user-metadata {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex: 2.5;
+            min-width: 600px;
+        }
+
+        .metadata-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 120px;
+        }
+
+        .metadata-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 3px;
+            font-weight: 500;
+        }
+
+        .metadata-value {
+            font-size: 16px;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            min-width: 280px;
+            justify-content: flex-end;
+        }
+
+        .btn-edit {
+            background-color: transparent;
+            border: 1px solid #0d6efd;
+            color: #0d6efd;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 70px;
+        }
+
+            .btn-edit:hover {
+                background-color: #0d6efd;
+                color: #fff;
+            }
+
+        .btn-deactivate {
+            background-color: transparent;
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+            .btn-deactivate:hover {
+                background-color: #dc3545;
+                color: #fff;
+            }
+
+        .btn-activate {
+            background-color: transparent;
+            border: 1px solid #28a745;
+            color: #28a745;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+            .btn-activate:hover {
+                background-color: #28a745;
+                color: #fff;
+            }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        #successMessage {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 15px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="header-left">
+            <h5><b>DMC Portal</b></h5>
+            <p class="text-muted">Travel Management System</p>
+        </div>
+        <div class="header-right">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="text-muted ms-1">Notifications</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">JD</div>
+                <span class="user-name">John Doe</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="#"><span>📊</span> Dashboard</a>
+            <a href="/Trip/Index" class="list-group-item list-group-item-action">✈️ Trip Management</a>
+            <a href="#"><span>👥</span> Lead Management</a>
+            <a href="#" class="list-group-item list-group-item-action active">👤 User Management</a>
+            <a href="/Role/Index" class="list-group-item list-group-item-action ">👤 Role Management</a>
+            <a href="/Operation/Index/" class="list-group-item list-group-item-action ">👤 Operation Management</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-area">
+            <h4><b>User Management</b></h4>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="alert alert-success d-none"></div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search users...">
+                    <button class="btn btn-outline-primary">Filter by Role</button>
+                    <button class="btn btn-outline-secondary">Export Users</button>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal" id="addNewUserBtn">+ Add New User</button>
+            </div>
+
+
+            <!-- User Statistics -->
+            <div class="row text-center mb-4">
+                <div class="col">
+                    <div class="card-counter">
+                        <h4 style="color:blue;"><b>12</b></h4>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-counter">
+                        <h4 style="color:green;"><b>10</b></h4>
+                        <p>Active Users</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-counter">
+                        <h4 style="color:red;"><b>3</b></h4>
+                        <p>Admins</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-counter">
+                        <h4 style="color:purple;"><b>5</b></h4>
+                        <p>Trip Managers</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Users -->
+            <h5><b>System Users</b></h5>
+            <div id="usersContainer" class="d-flex flex-column gap-3">
+                <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0" id="registerModalBody">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Assign Role Modal -->
+    <div class="modal fade" id="assignRoleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Roles</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="roleCheckboxList" class="form-check d-flex flex-column gap-2">
+                        <div class="text-center"><div class="spinner-border text-primary"></div></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="saveRoleBtn">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+                <br>
+           
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!--for Role modal-->
+    <script>
+        apiBaseUrl = "https://localhost:7228";
+        let selectedUserId = null;
+
+        // Load users (with pagination support)
+        window.loadUsers = function (page = 1, pageSize = 10) {
+            $('#usersContainer').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
+
+            $.ajax({
+                url: `${apiBaseUrl}/api/User`,
+                type: 'GET',
+                success: function (data) {
+                    if (!data.length) {
+                        $('#usersContainer').html('<div class="alert alert-warning text-center">No users found.</div>');
+                        return;
+                    }
+
+                    const totalPages = Math.ceil(data.length / pageSize);
+                    const start = (page - 1) * pageSize;
+                    const usersToShow = data.slice(start, end = start + pageSize);
+
+                    let html = '';
+                    usersToShow.forEach(user => {
+                        let initials = (user.firstName?.charAt(0) ?? '') + (user.lastName?.charAt(0) ?? '');
+                        let rolesHtml = (user.roles ?? []).map(role => `<span class="badge bg-info me-1">${role}</span>`).join('');
+
+                        html += `
+                                <div class="user-card">
+                                    <div class="user-info-section">
+                                        <div class="user-initial">${initials.toUpperCase()}</div>
+                                        <div class="user-details">
+                                            <div class="user-name-text">${user.firstName} ${user.lastName}</div>
+                                            <div class="user-email">${user.emailAddress}</div>
+                                        </div>
+                                    </div>
+                                    <div class="user-metadata">
+                                        <div class="metadata-group">
+                                            <div class="metadata-label">Role:</div>
+                                            <div class="metadata-value" id="roleColumn-${user.userId}">
+                                                ${rolesHtml || '<span class="text-muted">No roles</span>'}
+                                            </div>
+                                        </div>
+                                        <div class="metadata-group">
+                                            <div class="metadata-label">Mobile No:</div>
+                                            <div class="metadata-value">${user.mobileNo ?? '-'}</div>
+                                        </div>
+                                        <div class="metadata-group">
+                                            <div class="metadata-label">Last Login:</div>
+                                            <div class="metadata-value">${user.lastLoggedOn?.substring(0, 10) ?? '-'}</div>
+                                        </div>
+                                        <div class="metadata-group">
+                                            <div class="metadata-label">Status:</div>
+                                            <div class="metadata-value">
+                                                <span class="status-badge ${user.isActive ? 'status-active' : 'status-inactive'}">
+                                                    ${user.isActive ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="user-actions">
+                                        <button class="btn btn-outline-success btn-sm assign-role-btn"
+                                                data-userid="${user.userId}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#assignRoleModal">
+                                            Assign Role
+                                        </button>
+                                        <button class="btn btn-edit">Edit</button>
+                                        <button class="btn ${user.isActive ? 'btn-deactivate' : 'btn-activate'}">
+                                            ${user.isActive ? 'Deactivate' : 'Activate'}
+                                        </button>
+                                    </div>
+                                </div>`;
+                    });
+
+                    let pagination = `<nav><ul class="pagination justify-content-center mt-3">`;
+                    for (let i = 1; i <= totalPages; i++) {
+                        pagination += `<li class="page-item ${i === page ? 'active' : ''}">
+                                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                                </li>`;
+                    }
+                    pagination += `</ul></nav>`;
+
+                    $('#usersContainer').html(html + pagination);
+                },
+                error: function () {
+                    $('#usersContainer').html('<div class="alert alert-danger text-center">Failed to load users.</div>');
+                }
+            });
+        };
+
+        // Handle pagination click
+        $(document).on('click', '.pagination .page-link', function (e) {
+            e.preventDefault();
+            const page = parseInt($(this).data('page'));
+            loadUsers(page);
+        });
+
+        // Open modal and load roles
+        $(document).on("click", ".assign-role-btn", function () {
+            selectedUserId = $(this).data("userid");
+
+            $("#roleCheckboxList").html(`
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>`);
+
+            // Get all roles
+            $.get(`${apiBaseUrl}/api/Role`, function (roles) {
+                // Get assigned roles
+                $.get(`${apiBaseUrl}/api/UserRole/User/${selectedUserId}`, function (assignedRaw) {
+                    const assignedIds = assignedRaw.map(r => {
+                        if (typeof r === "number") return r;
+                        if (r.roleId) return parseInt(r.roleId);
+                        if (r.RoleId) return parseInt(r.RoleId);
+                        const numVal = Object.values(r).find(val => !isNaN(val));
+                        return parseInt(numVal);
+                    });
+
+                    let html = '';
+                    roles.forEach(role => {
+                        const isChecked = assignedIds.includes(role.roleId) ? "checked" : "";
+
+                        html += `
+                                <div class="form-check d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <input class="form-check-input role-checkbox"
+                                               type="checkbox"
+                                               value="${role.roleId}"
+                                               id="role-${role.roleId}" ${isChecked}>
+                                        <label class="form-check-label" for="role-${role.roleId}">
+                                            ${role.roleName}
+                                        </label>
+                                    </div>
+                                 
+                                </div>`;
+                    });
+
+                    $("#roleCheckboxList").html(html);
+                });
+            });
+        });
+
+        // Save assigned roles and update grid
+        $("#saveRoleBtn").click(function () {
+            const selectedRoles = $(".role-checkbox:checked").map(function () {
+                return parseInt($(this).val());
+            }).get();
+
+            if (!selectedUserId || selectedRoles.length === 0) {
+                alert("Please select at least one role.");
+                return;
+            }
+
+            $.ajax({
+                url: `${apiBaseUrl}/api/UserRole/AssignRoles`,
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    userId: selectedUserId,
+                    roleIds: selectedRoles
+                }),
+                success: function (res) {
+                    $("#assignRoleModal").modal("hide");
+                    $('#successMessage').text(res.message).removeClass("d-none");
+                    setTimeout(() => $('#successMessage').addClass("d-none"), 3000);
+
+                    loadUsers();
+
+                    $.get(`${apiBaseUrl}/api/UserRole/GetRoleNamesForUser/${selectedUserId}`, function (roleNames) {
+                        const badges = roleNames.map(r => `<span class="badge bg-info me-1">${r}</span>`).join('');
+                        $(`#roleColumn-${selectedUserId}`).html(badges || '<span class="text-muted">No roles</span>');
+                    });
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.responseText);
+                    console.log(xhr);
+                }
+            });
+        });
+
+        // Initial page load
+        $(document).ready(function () {
+            loadUsers();
+
+            // Optional registration modal logic
+            $('#addNewUserBtn').click(function () {
+                $('#registerModalBody').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
+                $('#registerModalBody').load('/Register/Index?modal=true');
+            });
+
+            $(document).on('submit', '#modalRegisterForm', function (e) {
+                e.preventDefault();
+                var $form = $(this);
+                $.ajax({
+                    url: $form.attr('action') + '?modal=true',
+                    method: 'POST',
+                    data: $form.serialize(),
+                })
+                    .done(function (result) {
+                        if (result.success) {
+                            const modalEl = document.getElementById('registerModal');
+                            const modal = bootstrap.Modal.getInstance(modalEl);
+                            modal.hide();
+                            $('#successMessage').text(result.message).removeClass("d-none");
+                            setTimeout(() => $('#successMessage').addClass("d-none"), 4000);
+                            loadUsers();
+                        } else {
+                            $('#registerModalBody').html(result);
+                        }
+                    })
+                    .fail(function () {
+                        $('#registerModalBody').html('<div class="alert alert-danger p-3">Server error, try again.</div>');
+                    });
+            });
+        });
+    </script>
+
+
+
+
+    <script>
+         apiBaseUrl = "https://localhost:7228";
+
+        $(document).ready(function () {
+            loadUsers(); // Load page 1 on start
+
+            // Function to load users with pagination
+            function loadUsers(page = 1, pageSize = 10) {
+                $('#usersContainer').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
+
+                $.ajax({
+                    url: `${apiBaseUrl}/api/User`,
+                    type: 'GET',
+                    success: function (data) {
+                        if (data.length === 0) {
+                            $('#usersContainer').html('<div class="alert alert-warning text-center">No users found.</div>');
+                            return;
+                        }
+
+                        const totalPages = Math.ceil(data.length / pageSize);
+                        const start = (page - 1) * pageSize;
+                        const end = start + pageSize;
+                        const usersToShow = data.slice(start, end);
+
+                        let userCards = '';
+                        usersToShow.forEach(function (user) {
+                            let initials = (user.firstName?.charAt(0) ?? '') + (user.lastName?.charAt(0) ?? '');
+                            userCards += `
+                                        <div class="user-card">
+                                            <div class="user-info-section">
+                                                <div class="user-initial">${initials.toUpperCase()}</div>
+                                                <div class="user-details">
+                                                    <div class="user-name-text">${user.firstName} ${user.lastName}</div>
+                                                    <div class="user-email">${user.emailAddress}</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="user-metadata">
+                                                <div class="metadata-group">
+                                                    <div class="metadata-label">Role:</div>
+                                                           <div class="metadata-value">
+            ${(user.roles ?? []).map(r => `<span class="badge bg-info me-1">${r}</span>`).join('')}
+        </div>
+   
+
+                                                </div>
+                                                <div class="metadata-group">
+                                                    <div class="metadata-label">Mobile No:</div>
+                                                    <div class="metadata-value">${user.mobileNo ?? '-'}</div>
+                                                </div>
+                                                <div class="metadata-group">
+                                                    <div class="metadata-label">Last Login:</div>
+                                                    <div class="metadata-value">${user.lastLoggedOn?.substring(0, 10) ?? '-'}</div>
+                                                </div>
+                                                <div class="metadata-group">
+                                                    <div class="metadata-label">Status:</div>
+                                                    <div class="metadata-value">
+                                                        <span class="status-badge ${user.isActive ? 'status-active' : 'status-inactive'}">
+                                                            ${user.isActive ? 'Active' : 'Inactive'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="user-actions">
+                                                     <button class="btn btn-outline-success btn-sm assign-role-btn" data-userid="${user.userId}" data-bs-toggle="modal" data-bs-target="#assignRoleModal">
+                                                            Assign Role
+                                                        </button>
+
+                                                <button class="btn btn-edit">Edit</button>
+                                                <button class="btn ${user.isActive ? 'btn-deactivate' : 'btn-activate'}">
+                                                    ${user.isActive ? 'Deactivate' : 'Activate'}
+                                                </button>
+                                               
+                                            </div>
+                                        </div>
+                                    `;
+                        });
+
+                        let pagination = `<nav><ul class="pagination justify-content-center mt-3">`;
+                        for (let i = 1; i <= totalPages; i++) {
+                            pagination += `
+                                        <li class="page-item ${i === page ? 'active' : ''}">
+                                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                                        </li>`;
+                        }
+                        pagination += `</ul></nav>`;
+
+                        $('#usersContainer').html(userCards + pagination);
+                    },
+                    error: function () {
+                        $('#usersContainer').html('<div class="alert alert-danger text-center">Failed to load users.</div>');
+                    }
+                });
+            }
+
+            // Handle pagination click
+            $(document).on('click', '.pagination .page-link', function (e) {
+                e.preventDefault();
+                const page = parseInt($(this).data('page'));
+                loadUsers(page);
+            });
+
+            // Open modal
+            $('#addNewUserBtn').click(function () {
+                $('#registerModalBody').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
+                $('#registerModalBody').load('/Register/Index?modal=true');
+            });
+
+            // Submit modal form
+            $(document).on('submit', '#modalRegisterForm', function (e) {
+                e.preventDefault();
+                var $form = $(this);
+                $.ajax({
+                    url: $form.attr('action') + '?modal=true',
+                    method: 'POST',
+                    data: $form.serialize(),
+                })
+                    .done(function (result) {
+                        if (result.success) {
+                            const modalEl = document.getElementById('registerModal');
+                            const modal = bootstrap.Modal.getInstance(modalEl);
+                            modal.hide();
+
+                            $('#successMessage').text(result.message).removeClass("d-none");
+                            setTimeout(() => { $('#successMessage').addClass("d-none"); }, 4000);
+
+                            loadUsers();
+                        } else {
+                            $('#registerModalBody').html(result);  // fallback if validation fails
+                        }
+                    })
+                    .fail(function () {
+                        $('#registerModalBody').html('<div class="alert alert-danger p-3">Server error, try again.</div>');
+                    });
+            });
+
+        });
+    </script>
+
+</body>
+</html>
