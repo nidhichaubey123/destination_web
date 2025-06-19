@@ -226,3 +226,4 @@ D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\ref
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.pdb
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.genruntimeconfig.cache
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\ref\DMCPortal.Web.dll
+D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.sourcelink.json
