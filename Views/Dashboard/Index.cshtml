@@ -407,12 +407,138 @@
             </div>
         </div>
     </div>
-
+    <!-- Add Edit User Modal -->
+    <!-- Add Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editUserForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editFirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="editFirstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMiddleName" class="form-label">Middle Name</label>
+                            <input type="text" class="form-control" id="editMiddleName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="editLastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmailAddress" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="editEmailAddress" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMobileNo" class="form-label">Mobile No</label>
+                            <input type="text" class="form-control" id="editMobileNo">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <script>
+        // Open edit modal and populate data
+        $(document).on("click", ".edit-user-btn", function () {
+            const userId = $(this).data("userid");
+
+            $.get(`${apiBaseUrl}/api/User`, function (users) {
+                const user = users.find(u => u.userId === userId);
+                if (!user) {
+                    alert("User not found.");
+                    return;
+                }
+
+                $("#editUserId").val(user.userId);
+                $("#editFirstName").val(user.firstName);
+                $("#editMiddleName").val(user.middleName || '');
+                $("#editLastName").val(user.lastName);
+                $("#editEmailAddress").val(user.emailAddress);
+                $("#editMobileNo").val(user.mobileNo);
+
+                const modal = new bootstrap.Modal(document.getElementById("editUserModal"));
+                modal.show();
+            });
+        });
+
+        // Save edited user
+     $("#editUserForm").submit(function (e) {
+       e.preventDefault();
+    
+        const sessionId = sessionStorage.getItem("sessionId");
+       const id = $("#editUserId").val();
+      const firstName = $("#editFirstName").val().trim();
+            const middleName = $("#editMiddleName").val().trim();
+    const lastName = $("#editLastName").val().trim();
+    const email = $("#editEmailAddress").val().trim();
+    const mobile = $("#editMobileNo").val().trim();
+
+    // Validation
+    if (!firstName || !lastName || !email) {
+        alert("First name, last name, and email are required.");
+        return;
+    }
+
+    
+
+    if (mobile && !/^\d{10}$/.test(mobile)) {
+        alert("Mobile number must be exactly 10 digits if provided.");
+        return;
+    }
+
+    const data = {
+        userId: id,
+        firstName,
+        lastName,
+        emailAddress: email,
+        mobileNo: mobile,
+        middleName: $("#editMiddleName").val().trim()
+    };
+
+    // Submit AJAX PUT
+    $.ajax({
+        url: `${apiBaseUrl}/api/User/${id}`, // Ensure your controller allows this
+        method: "PUT",
+        contentType: "application/json",
+        data: JSON.stringify(data),
+        success: function (res) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById("editUserModal"));
+            modal.hide();
+            $('#successMessage').text(res.message || 'User updated successfully').removeClass("d-none");
+            setTimeout(() => location.reload(), 1500);
+        },
+        error: function (xhr) {
+            const errorResponse = xhr.responseJSON;
+            if (errorResponse?.errors?.emailAddress) {
+                alert("Email already exists.");
+            } else {
+                alert("Failed to update user: " + xhr.responseText);
+            }
+        }
+    });
+});
+
+    </script>
+
+
 
     <script>
         const apiBaseUrl = "https://localhost:7228";
@@ -480,7 +606,10 @@
                                                 data-bs-target="#assignRoleModal">
                                             Assign Role
                                         </button>
-                                        <button class="btn btn-edit">Edit</button>
+                                   <button class="btn btn-edit btn-sm edit-user-btn" data-userid="${user.userId}">
+    Edit
+</button>
+
                                         <button class="btn btn-danger btn-delete-user" data-userid="${user.userId}">Delete</button>
                                         <button class="btn ${user.isActive ? 'btn-deactivate' : 'btn-activate'}">
                                             ${user.isActive ? 'Deactivate' : 'Activate'}
@@ -541,7 +670,7 @@
                             // Reload page after registration
                             setTimeout(() => {
                                 location.reload();
-                            }, 500);
+                            }, 1500);
                         } else {
                             $('#registerModalBody').html(result); // show validation errors
                         }
@@ -642,6 +771,7 @@
             });
         });
     </script>
+
 
 
 </body>

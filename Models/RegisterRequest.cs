@@ -4,6 +4,8 @@ namespace DMCPortal.Web.Models
 {
     public class RegisterRequest
     {
+        public int UserId { get; set; }
+
 
         [Required(ErrorMessage = "Email Address is required")]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
