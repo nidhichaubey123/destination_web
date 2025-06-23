@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "m0ZlQ+KFDMjdwSS/aSO3bO5Gh3v5UnE2D4N73NM0ORc=",
+  "Hash": "nKTNVvFjbzF18ybzHkvKDbHO4OaVok91z5piVnz90JA=",
   "Source": "DMCPortal.Web",
   "BasePath": "_content/DMCPortal.Web",
   "Mode": "Default",
@@ -53,6 +53,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "D:\\Work Folder\\Truvai\\DMC\\truvaidmcportal-web\\DMCPortal.Web\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\DMCPortal.Web.bundle.scp.css"
+    },
+    {
+      "Identity": "D:\\Work Folder\\Truvai\\DMC\\truvaidmcportal-web\\DMCPortal.Web\\wwwroot\\css\\Register.cs",
+      "SourceId": "DMCPortal.Web",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Work Folder\\Truvai\\DMC\\truvaidmcportal-web\\DMCPortal.Web\\wwwroot\\",
+      "BasePath": "_content/DMCPortal.Web",
+      "RelativePath": "css/Register.cs",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\Register.cs"
     },
     {
       "Identity": "D:\\Work Folder\\Truvai\\DMC\\truvaidmcportal-web\\DMCPortal.Web\\wwwroot\\css\\site.css",

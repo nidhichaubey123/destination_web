@@ -1,19 +1,15 @@
 ﻿using DMCPortal.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DMCPortal.Web.Controllers
 {
-
     [AllowAnonymous]
     public class LoginController : Controller
     {
@@ -37,8 +33,7 @@ namespace DMCPortal.Web.Controllers
                 return View(request);
 
             using var client = new HttpClient { BaseAddress = new Uri(_apiSettings.BaseUrl) };
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             var response = await client.PostAsJsonAsync("api/User/login", request);
 
@@ -49,17 +44,32 @@ namespace DMCPortal.Web.Controllers
                 {
                     PropertyNameCaseInsensitive = true
                 });
+
+                if (result == null || string.IsNullOrEmpty(result.SessionId.ToString()))
+                {
+                    ModelState.AddModelError(string.Empty, "Login failed: Invalid server response.");
+                    return View(request);
+                }
+
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, request.EmailAddress),
                     new Claim("SessionId", result.SessionId.ToString())
                 };
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                // ✅ Add each operation name as a claim
+                if (result.Operations != null)
+                {
+                    foreach (var operation in result.Operations)
+                    {
+                        claims.Add(new Claim("Operation", operation));
+                    }
+                }
 
-                await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
 
+                await HttpContext.SignInAsync("MyCookieAuth", principal);
 
                 return RedirectToAction("Index", "Dashboard");
             }
@@ -70,6 +80,7 @@ namespace DMCPortal.Web.Controllers
                 {
                     PropertyNameCaseInsensitive = true
                 });
+
                 ModelState.AddModelError(string.Empty, apiError?.Message ?? "Login failed");
                 return View(request);
             }

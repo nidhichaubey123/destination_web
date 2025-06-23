@@ -1,5 +1,103 @@
 ﻿@model List<DMCPortal.Web.Models.Role>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
 
+    .top-header {
+        background-color: #ffffff;
+        border-bottom: 1px solid #dee2e6;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left h5 {
+        margin: 0;
+        color: #0d6efd;
+    }
+
+    .header-left p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .notification-icon {
+        position: relative;
+        color: #6c757d;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 8px;
+    }
+
+        .notification-icon:hover {
+            color: #0d6efd;
+        }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        background-color: #0d6efd;
+        color: #fff;
+        font-weight: bold;
+        font-size: 14px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #000;
+    }
+
+    .main-container {
+        display: flex;
+        height: calc(100vh - 60px);
+    }
+
+    .sidebar {
+        width: 250px;
+        background-color: #ffffff;
+        border-right: 1px solid #dee2e6;
+        padding: 20px;
+    }
+
+        .sidebar a {
+            display: block;
+            padding: 12px 10px;
+            margin-bottom: 8px;
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+            .sidebar a.active, .sidebar a:hover {
+                background-color: #e9ecef;
+                font-weight: bold;
+            }
+
+    .content-area {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+</style>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Bootstrap CSS -->
@@ -11,7 +109,53 @@
 <!-- Bootstrap JS Bundle (includes Popper) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<div class="container mt-5">
+
+<!-- Top Header -->
+<div class="top-header">
+    <div class="header-left">
+        <h5><b>DMC Portal</b></h5>
+        <p class="text-muted">Travel Management System</p>
+    </div>
+    <div class="header-right">
+        <div class="notification-icon">
+            <i class="fas fa-bell"></i>
+            <span class="text-muted ms-1">Notifications</span>
+        </div>
+        <div class="user-info">
+            <div class="user-avatar">JD</div>
+            <span class="user-name">John Doe</span>
+        </div>
+    </div>
+</div>
+<div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="@Url.Action("Index", "Dashboard")" class="list-group-item list-group-item-action">
+            📊 Dashboard
+        </a>
+
+
+        <a href="/Trip/Index" class="list-group-item list-group-item-action">✈️ Trip Management</a>
+
+        <a href="@Url.Action("Index", "LeadManagement")" class="list-group-item list-group-item-action">
+            👥 Lead Management
+        </a>
+
+        <a href="@Url.Action("Index", "UserManagement")" class="list-group-item list-group-item-action">
+            👤 User Management
+        </a>
+
+        <a href="@Url.Action("Index", "Role")" class="list-group-item list-group-item-action">
+            👤 Role Management
+        </a>
+
+        <a href="@Url.Action("Index", "Operation")" class="list-group-item list-group-item-action">
+            👤 Operation Management
+        </a>
+    </div>
+    <div class="content-area d-flex justify-content-center">
+        <div class="w-100" style="max-width: 90%;">
+
     <h2 class="mb-4 text-center">Role Master</h2>
 
     <div id="alertPlaceholder"></div>
@@ -39,6 +183,9 @@
     </table>
 </div>
 
+<div>
+</div>
+</div>
 <!-- Assign Operation Modal -->
 <div class="modal fade" id="assignOperationModal" tabindex="-1" aria-labelledby="assignOperationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

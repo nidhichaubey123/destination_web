@@ -210,6 +210,7 @@ D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMC
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.MvcApplicationPartsAssemblyInfo.cache
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.RazorAssemblyInfo.cache
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.RazorAssemblyInfo.cs
+D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.sourcelink.json
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\staticwebassets.build.json
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\staticwebassets.development.json
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\staticwebassets\msbuild.DMCPortal.Web.Microsoft.AspNetCore.StaticWebAssets.props
@@ -226,4 +227,3 @@ D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\ref
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.pdb
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.genruntimeconfig.cache
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\ref\DMCPortal.Web.dll
-D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.sourcelink.json

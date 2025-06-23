@@ -166,7 +166,7 @@
 
         .user-metadata {
             display: flex;
-            gap: 20px;
+            gap: 50px;
             align-items: center;
             flex: 2.5;
             min-width: 600px;
@@ -213,6 +213,41 @@
 
             .btn-edit:hover {
                 background-color: #0d6efd;
+                color: #fff;
+            }
+
+
+
+
+        button.btn.btn-outline-success.btn-sm.assign-role-btn {
+            background-color: transparent;
+            border: 1px solid #28a745;
+            color: #28a745;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 70px;
+        }
+
+            button.btn.btn-outline-success.btn-sm.assign-role-btn:hover {
+            background-color: #28a745;
+                color: #fff;
+            }
+
+        .btn-delete {
+            background-color: transparent;
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            min-width: 70px;
+        }
+
+            .btn-delete:hover {
+                background-color: #dc3545;
                 color: #fff;
             }
 
@@ -299,14 +334,29 @@
     </div>
 
     <div class="main-container">
-        <!-- Sidebar -->
         <div class="sidebar">
-            <a href="#"><span>📊</span> Dashboard</a>
+            <a href="@Url.Action("Index", "Dashboard")" class="list-group-item list-group-item-action">
+                📊 Dashboard
+            </a>
+
+
             <a href="/Trip/Index" class="list-group-item list-group-item-action">✈️ Trip Management</a>
-            <a href="#"><span>👥</span> Lead Management</a>
-            <a href="#" class="list-group-item list-group-item-action active">👤 User Management</a>
-            <a href="/Role/Index" class="list-group-item list-group-item-action ">👤 Role Management</a>
-            <a href="/Operation/Index/" class="list-group-item list-group-item-action ">👤 Operation Management</a>
+
+            <a href="@Url.Action("Index", "LeadManagement")" class="list-group-item list-group-item-action">
+                👥 Lead Management
+            </a>
+
+            <a href="@Url.Action("Index", "UserManagement")" class="list-group-item list-group-item-action">
+                👤 User Management
+            </a>
+
+            <a href="@Url.Action("Index", "Role")" class="list-group-item list-group-item-action">
+                👤 Role Management
+            </a>
+
+            <a href="@Url.Action("Index", "Operation")" class="list-group-item list-group-item-action">
+                👤 Operation Management
+            </a>
         </div>
 
         <!-- Main Content -->
@@ -449,15 +499,28 @@
         </div>
     </div>
 
+    @{
+        var userOperations = User.Claims
+        .Where(c => c.Type == "Operation")
+        .Select(c => c.Value)
+        .ToList();
+
+        bool canEdit = userOperations.Contains("CanEditUser");
+        bool canDelete = userOperations.Contains("CanDeleteUser");
+    }
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script>
+        const hasEditPermission = @canEdit.ToString().ToLower();
+        const hasDeletePermission = @canDelete.ToString().ToLower();
+    </script>
 
     <script>
         // Open edit modal and populate data
-        $(document).on("click", ".edit-user-btn", function () {
+        $(document).on("click", ".btn-edit", function () {
             const userId = $(this).data("userid");
 
             $.get(`${apiBaseUrl}/api/User`, function (users) {
@@ -564,58 +627,66 @@
                     let html = '';
                     usersToShow.forEach(user => {
                         let initials = (user.firstName?.charAt(0) ?? '') + (user.lastName?.charAt(0) ?? '');
-                        let rolesHtml = (user.roles ?? []).map(role => `<span class="badge bg-info me-1">${role}</span>`).join('');
+                        let rolesHtml = (user.roles ?? []).map(role =>
+                            `<span class="badge me-1 p-2" style="background-color: #0d6efd; color: white;">${role}</span>`
+                        ).join('');
 
                         html += `
-                                <div class="user-card">
-                                    <div class="user-info-section">
-                                        <div class="user-initial">${initials.toUpperCase()}</div>
-                                        <div class="user-details">
-                                            <div class="user-name-text">${user.firstName} ${user.lastName}</div>
-                                            <div class="user-email">${user.emailAddress}</div>
-                                        </div>
-                                    </div>
-                                    <div class="user-metadata">
-                                        <div class="metadata-group">
-                                            <div class="metadata-label">Role:</div>
-                                            <div class="metadata-value" id="roleColumn-${user.userId}">
-                                                ${rolesHtml || '<span class="text-muted">No roles</span>'}
-                                            </div>
-                                        </div>
-                                        <div class="metadata-group">
-                                            <div class="metadata-label">Mobile No:</div>
-                                            <div class="metadata-value">${user.mobileNo ?? '-'}</div>
-                                        </div>
-                                        <div class="metadata-group">
-                                            <div class="metadata-label">Last Login:</div>
-                                            <div class="metadata-value">${user.lastLoggedOn?.substring(0, 10) ?? '-'}</div>
-                                        </div>
-                                        <div class="metadata-group">
-                                            <div class="metadata-label">Status:</div>
-                                            <div class="metadata-value">
-                                                <span class="status-badge ${user.isActive ? 'status-active' : 'status-inactive'}">
-                                                    ${user.isActive ? 'Active' : 'Inactive'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="user-actions">
-                                        <button class="btn btn-outline-success btn-sm assign-role-btn"
-                                                data-userid="${user.userId}"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#assignRoleModal">
-                                            Assign Role
-                                        </button>
-                                   <button class="btn btn-edit btn-sm edit-user-btn" data-userid="${user.userId}">
-    Edit
-</button>
+            <div class="user-card">
+                <div class="user-info-section">
+                    <div class="user-initial">${initials.toUpperCase()}</div>
+                    <div class="user-details">
+                        <div class="user-name-text">${user.firstName} ${user.lastName}</div>
+                        <div class="user-email">${user.emailAddress}</div>
+                    </div>
+                </div>
+                <div class="user-metadata">
+                    <div class="metadata-group">
+                        <div class="metadata-label">Role:</div>
+                        <div class="metadata-value" id="roleColumn-${user.userId}">
+                            ${rolesHtml || '<span class="text-muted">No roles</span>'}
+                        </div>
+                    </div>
+                    <div class="metadata-group">
+                        <div class="metadata-label">Mobile No:</div>
+                        <div class="metadata-value">${user.mobileNo ?? '-'}</div>
+                    </div>
+                    <div class="metadata-group">
+                        <div class="metadata-label">Last Login:</div>
+                        <div class="metadata-value">${user.lastLoggedOn?.substring(0, 10) ?? '-'}</div>
+                    </div>
+                    <div class="metadata-group">
+                        <div class="metadata-label">Status:</div>
+                        <div class="metadata-value">
+                                  <span class="status-badge ${user.userIsActive ? 'status-active' : 'status-inactive'}">
+            ${user.userIsActive ? 'Active' : 'Inactive'}
+        </span>
 
-                                        <button class="btn btn-danger btn-delete-user" data-userid="${user.userId}">Delete</button>
-                                        <button class="btn ${user.isActive ? 'btn-deactivate' : 'btn-activate'}">
-                                            ${user.isActive ? 'Deactivate' : 'Activate'}
-                                        </button>
-                                    </div>
-                                </div>`;
+                        </div>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button class="btn btn-outline-success btn-sm assign-role-btn"
+                            data-userid="${user.userId}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#assignRoleModal">
+                        Assign Role
+                    </button>
+
+                    ${hasEditPermission ? `<button class="btn btn-edit" data-userid="${user.userId}">Edit</button>` : ''}
+        ${hasDeletePermission ? `<button class="btn btn-delete btn-delete-user" data-userid="${user.userId}">Delete</button>` : ''}
+
+
+                       <button class="btn ${user.userIsActive ? 'btn-deactivate' : 'btn-activate'} toggle-status-btn"
+            data-userid="${user.userId}"
+            data-currentstatus="${user.userIsActive}">
+            ${user.userIsActive ? 'Deactivate' : 'Activate'}
+        </button>
+
+
+                </div>
+            </div>`;
+
                     });
 
                     // Pagination
@@ -769,9 +840,34 @@
                     }
                 });
             });
+            $(document).on('click', '.toggle-status-btn', function () {
+                const userId = $(this).data('userid');
+                const currentStatus = $(this).data('currentstatus');
+                const newStatus = currentStatus ? false : true; // Toggle Boolean value
+
+                if (confirm(`Are you sure you want to ${newStatus ? 'Activate' : 'Deactivate'} this user?`)) {
+                    $.ajax({
+                        url: `${apiBaseUrl}/api/User/ChangeStatus/${userId}`,
+                        type: 'PUT',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ UserIsActive: newStatus }), // Capital "U"
+                        success: function () {
+                            $('#successMessage').text(`User ${newStatus ? 'Activated' : 'Deactivated'} successfully.`).removeClass("d-none");
+                            setTimeout(() => loadUsers(), 1000);
+                        },
+                        error: function (xhr) {
+                            console.log(xhr.responseText); // Debug response
+                            alert("Failed to update user status.");
+                        }
+                    });
+                }
+            });
+
+
         });
     </script>
 
+ 
 
 
 </body>

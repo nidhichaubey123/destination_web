@@ -4,8 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // MVC
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient();  // ? This is important
-// ? Remove: builder.Services.AddTransient<RoleController>();
+builder.Services.AddHttpClient();  
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

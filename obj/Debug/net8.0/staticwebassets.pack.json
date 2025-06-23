@@ -5,6 +5,10 @@
       "PackagePath": "staticwebassets\\DMCPortal.Web.bundle.scp.css"
     },
     {
+      "Id": "D:\\Work Folder\\Truvai\\DMC\\truvaidmcportal-web\\DMCPortal.Web\\wwwroot\\css\\Register.cs",
+      "PackagePath": "staticwebassets\\css\\Register.cs"
+    },
+    {
       "Id": "D:\\Work Folder\\Truvai\\DMC\\truvaidmcportal-web\\DMCPortal.Web\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },

@@ -1,84 +1,292 @@
 ﻿@model DMCPortal.Web.Models.LoginRequest
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-
 @{
     ViewData["Title"] = "User Login";
 }
 
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-            <div>@error.ErrorMessage</div>
-        }
-    </div>
-}
-
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
 <style>
-    .card {
-        max-width: 500px;
-        margin: 0 auto;
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
     }
 
-    .form-label {
-        font-weight: bold;
+    .login-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    .login-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .brand-logo {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .brand-logo i {
+        font-size: 2.5rem;
+        color: #1e40af;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .brand-title {
+        color: #1f2937;
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .brand-subtitle {
+        color: #6b7280;
+        font-size: 0.9rem;
+        font-weight: 400;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-floating input {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        color: #1f2937;
+        padding: 1rem 3rem 1rem 1rem;
+        font-size: 1rem;
+        height: 56px;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-floating input:focus {
+        background: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .form-floating input::placeholder {
+        color: #9ca3af;
+    }
+
+    .form-floating label {
+        color: #374151;
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding-left: 1rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 1rem;
+        pointer-events: none;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 4px;
+    }
+
+    .login-btn {
+        background: #2563eb;
+        border: none;
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 1rem 2rem;
+        width: 100%;
+        height: 56px;
+        margin-bottom: 1.5rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .login-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.25rem;
+        font-weight: 500;
     }
 
     .alert-success {
-        font-weight: bold;
-        font-size: 1.1rem;
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .session-id {
+        color: #2563eb;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .validation-summary {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        color: #dc2626;
+        font-weight: 500;
+    }
+
+    .text-danger {
+        color: #dc2626 !important;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-top: 0.4rem;
+        display: block;
+    }
+
+    @@media (max-width: 768px) {
+        .login-container {
+            padding: 1rem;
+        }
+        
+        .login-card {
+            padding: 2rem 1.5rem;
+            max-width: 100%;
+        }
+        
+        .brand-title {
+            font-size: 1.5rem;
+        }
+
+        .brand-subtitle {
+            font-size: 0.85rem;
+        }
+
+        .form-floating input {
+            font-size: 16px;
+            height: 52px;
+        }
+
+        .login-btn {
+            height: 52px;
+        }
     }
 </style>
 
-<div class="container mt-5">
-    <div class="card shadow-lg rounded-4">
-        <div class="card-body">
-            <h2 class="card-title text-center mb-4 text-primary">User Login</h2>
-
-            <form asp-action="Index" asp-controller="Login" method="post" class="row g-3 p-3">
-
-                <div class="col-12">
-                    <label asp-for="EmailAddress" class="form-label">Email Address</label>
-                    <input asp-for="EmailAddress" class="form-control" placeholder="Enter email" />
-                    <span asp-validation-for="EmailAddress" class="text-danger fw-bold"></span>
-                </div>
-
-                <div class="col-12">
-                    <label asp-for="Password" class="form-label">Password</label>
-                    <input asp-for="Password" class="form-control" type="password" placeholder="Enter password" />
-                    <span asp-validation-for="Password" class="text-danger fw-bold"></span>
-                </div>
-
-                <div class="col-12 text-center mt-3">
-                    <button type="submit" class="btn btn-primary btn-lg w-50">Login</button>
-                </div>
-            </form>
-@* 
-            <div class="text-center mt-3">
-                <p>New user? <a asp-controller="Register" asp-action="Index" class="fw-bold text-decoration-none text-primary">Register here</a></p>
-            </div> *@
-
-            @if (ViewBag.SessionId != null)
-            {
-                <div class="alert alert-success mt-4 text-center fw-bold">
-                    Login Successful! <br /> <span style="color: #0d6efd">Session ID: @ViewBag.SessionId</span>
-                </div>
-            }
-
-            @* Show Failure Message if login failed *@
-            @if (TempData["LoginError"] != null)
-            {
-                <div class="alert alert-danger mt-4 text-center fw-bold">
-                    @TempData["LoginError"]
-                </div>
-            }
+<div class="login-container">
+    <div class="login-card">
+        <div class="brand-logo">
+            <i class="fas fa-shield-alt"></i>
+            <h1 class="brand-title">DMC Portal</h1>
+            <p class="brand-subtitle">Secure Access Gateway</p>
         </div>
+
+        @* Model State Validation Summary *@
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="validation-summary">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        @* Login Form *@
+        <form asp-action="Index" asp-controller="Login" method="post" class="needs-validation" novalidate>
+            <div class="form-floating">
+                <input asp-for="EmailAddress" class="form-control" type="email" placeholder="Enter your email address" required />
+                <label asp-for="EmailAddress">Email Address</label>
+                <i class="fas fa-envelope input-icon"></i>
+                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating">
+                <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" required />
+                <label asp-for="Password">Password</label>
+                <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn login-btn">
+                <i class="fas fa-sign-in-alt me-2"></i>
+                Sign In
+            </button>
+        </form>
+
+        @* Success Message *@
+        @if (ViewBag.SessionId != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                Login Successful!<br>
+                <span class="session-id">Session ID: @ViewBag.SessionId</span>
+            </div>
+        }
+
+        @* Error Message *@
+        @if (TempData["LoginError"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["LoginError"]
+            </div>
+        }
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    // Password toggle functionality
+    function togglePassword() {
+        const passwordInput = document.querySelector('input[type="password"], input[type="text"][name="Password"]');
+        const toggleIcon = document.querySelector('.password-toggle');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+</script>

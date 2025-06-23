@@ -25,5 +25,6 @@ namespace DMCPortal.Web.Models
 
         [RegularExpression(@"^\d{10}$", ErrorMessage = "Mobile number must be exactly 10 digits")]
         public string? MobileNo { get; set; }
+        public bool UserIsActive { get; set; } = false;
     }
 }
