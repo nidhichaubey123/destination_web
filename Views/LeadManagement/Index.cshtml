@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@model DMCPortal.Web.Models.ViewModels.PaginatedLeadViewModel
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,21 +9,22 @@
     <!-- Bootstrap Bundle (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    @if (TempData["Success"] != null)
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    @if (TempData["Error"] != null)
     {
-        <div id="leadSuccessToast" class="position-fixed top-0 end-0 m-3 alert alert-success shadow-sm" style="z-index: 1055; min-width: 250px;">
-            @TempData["Success"]
+        <div id="leadErrorToast" class="position-fixed top-0 end-0 m-3 alert alert-danger shadow-sm" style="z-index: 1055; min-width: 250px;">
+            @TempData["Error"]
         </div>
 
         <script>
             setTimeout(() => {
-                const toast = document.getElementById('leadSuccessToast');
+                const toast = document.getElementById('leadErrorToast');
                 if (toast) toast.remove();
-            }, 3000); // 3 seconds
+            }, 1000); // 3 seconds
         </script>
     }
-
-
 
     <style>
         body {
@@ -32,6 +35,13 @@
             border: none;
             background-color: #d1e7dd;
             color: #0f5132;
+            font-size: 14px;
+        }
+
+        .alert-danger {
+            border: none;
+            background-color: #f8d7da;
+            color: #721c24;
             font-size: 14px;
         }
 
@@ -83,8 +93,8 @@
             color: #fff;
             font-weight: bold;
             font-size: 14px;
-            width: 32px;
-            height: 32px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -95,7 +105,6 @@
             font-weight: 600;
             color: #000;
         }
-
 
         .card-box {
             border: 1px solid #dee2e6;
@@ -135,6 +144,17 @@
             border-right: 1px solid #dee2e6;
             padding: 20px;
         }
+             .sidebar .list-group-item.active {
+         background-color: #0d6efd; /* Bootstrap Primary Blue */
+         color: white;
+         font-weight: bold;
+            }
+
+            .sidebar .list-group-item.active {
+                background-color: #0d6efd; /* Bootstrap Primary Blue */
+                color: white;
+                font-weight: bold;
+            }
 
             .sidebar a {
                 display: block;
@@ -160,10 +180,56 @@
             display: flex;
             height: calc(100vh - 60px);
         }
+
+        .status-hot {
+            color: #dc3545;
+        }
+
+        .status-warm {
+            color: #fd7e14;
+        }
+
+        .status-cold {
+            color: #0d6efd;
+        }
+
+
+        .modal.right .modal-dialog {
+            position: fixed;
+            right: 0;
+            top: 0;
+            margin: 0;
+            height: 100%;
+            max-width: 600px; /* Adjust width */
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .modal.right.show .modal-dialog {
+            transform: translateX(0);
+        }
+
+        .modal.right .modal-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0;
+        }
+
+        .modal.right .modal-body {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
     </style>
 </head>
 <body>
-
+    @{
+        var firstName = User.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? "User";
+        var lastName = User.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? "";
+        var initials = (string.IsNullOrEmpty(firstName) ? "" : firstName.Substring(0, 1).ToUpper()) +
+        (string.IsNullOrEmpty(lastName) ? "" : lastName.Substring(0, 1).ToUpper());
+    }
     <!-- Top Header -->
     <div class="top-header">
         <div class="header-left">
@@ -175,145 +241,213 @@
                 <i class="fas fa-bell"></i>
                 <span class="text-muted ms-1">Notifications</span>
             </div>
-            <div class="user-info">
-                <div class="user-avatar">JD</div>
-                <span class="user-name">John Doe</span>
+            <div class="user-info dropdown">
+                <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    @initials
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><span class="dropdown-item-text">@firstName @lastName</span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="javascript:void(0)" id="logoutBtn">Logout</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
+
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <a href="@Url.Action("Index", "Dashboard")" class="list-group-item list-group-item-action">
-                📊 Dashboard
-            </a>
+    <a href="@Url.Action("Index", "Dashboard")" 
+       class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Dashboard" ? "active" : "")">
+        📊 Dashboard
+    </a>
 
+    <a href="@Url.Action("Index", "Trip")" 
+       class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Trip" ? "active" : "")">
+        ✈️ Trip Management
+    </a>
 
-            <a href="/Trip/Index" class="list-group-item list-group-item-action">✈️ Trip Management</a>
+    <a href="@Url.Action("Index", "LeadManagement")" 
+       class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "LeadManagement" ? "active" : "")">
+        👥 Lead Management
+    </a>
 
-            <a href="@Url.Action("Index", "LeadManagement")" class="list-group-item list-group-item-action">
-                👥 Lead Management
-            </a>
+    <a href="@Url.Action("Index", "UserManagement")" 
+       class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "UserManagement" ? "active" : "")">
+        👤 User Management
+    </a>
 
-            <a href="@Url.Action("Index", "UserManagement")" class="list-group-item list-group-item-action">
-                👤 User Management
-            </a>
+    <a href="@Url.Action("Index", "Role")" 
+       class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Role" ? "active" : "")">
+        👤 Role Management
+    </a>
 
-            <a href="@Url.Action("Index", "Role")" class="list-group-item list-group-item-action">
-                👤 Role Management
-            </a>
+    <a href="@Url.Action("Index", "Operation")" 
+       class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Operation" ? "active" : "")">
+        👤 Operation Management
+    </a>
+</div>
 
-            <a href="@Url.Action("Index", "Operation")" class="list-group-item list-group-item-action">
-                👤 Operation Management
-            </a>
-        </div>
 
         <div class="content-area">
-            
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="fw-bold">Lead Management</h4>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold">Lead Management</h4>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLeadModal">
                     + Add New Lead
                 </button>
-
-
-
-        </div>
-
-        <div class="d-flex gap-3 mb-4">
-            <input type="text" class="form-control w-25" placeholder="Search leads...">
-            <button class="btn btn-outline-secondary">Filter by Status</button>
-            <button class="btn btn-outline-secondary">Export Leads</button>
-        </div>
-
-        <div class="d-flex gap-3 mb-4">
-            <div class="card-box w-25">
-                <div class="lead-type text-danger"><span class="lead-type-icon">🔥</span> Hot Leads</div>
-                <h5 class="mt-2">5</h5>
             </div>
-            <div class="card-box w-25">
-                <div class="lead-type text-warning"><span class="lead-type-icon">🔶</span> Warm Leads</div>
-                <h5 class="mt-2">12</h5>
-            </div>
-            <div class="card-box w-25">
-                <div class="lead-type text-primary"><span class="lead-type-icon">❄️</span> Cold Leads</div>
-                <h5 class="mt-2">8</h5>
-            </div>
-        </div>
 
-        <div class="card-box">
-            <h5 class="fw-semibold mb-3">Recent Leads</h5>
+            <div class="d-flex gap-3 mb-4">
+                <form method="get" class="d-flex mb-3" style="width:30%">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Search Leads" value="@Model.SearchTerm" />
+                    <button type="submit" class="btn btn-primary" style="width:25%;">Search</button>
+                </form>
 
-            <div class="mb-3 p-3 rounded bg-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="fw-bold">Sarah Johnson</div>
-                        <div class="text-muted small">sarah.j@email.com • +1 234-567-8901</div>
-                    </div>
-                    <div class="text-end">
-                        <div>Destination: <strong>Bali</strong></div>
-                        <div>PAX: 4</div>
-                        <div>Budget: <span class="text-success fw-bold">$8,000</span></div>
-                    </div>
-                    <div class="lead-contact">
-                        <span class="badge-lead border border-danger text-danger">Hot</span>
-                        <button class="btn btn-outline-dark btn-sm">Contact</button>
-                        <button class="btn btn-primary btn-sm">Convert</button>
-                    </div>
+                <button class="btn btn-outline-secondary" style="height:0%;width:9%;">Filter by Status</button>
+                <button class="btn btn-outline-secondary" style="height:0%;width:9%;">Export Leads</button>
+            </div>
+
+            <!-- Dynamic Status Cards -->
+            <div class="d-flex gap-3 mb-4">
+                @{
+                    var hotLeads = Model?.Leads?.Where(l => l.Status?.ToLower() == "hot").Count() ?? 0;
+                    var warmLeads = Model?.Leads?.Where(l => l.Status?.ToLower() == "warm").Count() ?? 0;
+                    var coldLeads = Model?.Leads?.Where(l => l.Status?.ToLower() == "cold").Count() ?? 0;
+                }
+
+                <div class="card-box w-25">
+                    <div class="lead-type text-danger"><span class="lead-type-icon">🔥</span> Hot Leads</div>
+                    <h5 class="mt-2">@hotLeads</h5>
+                </div>
+                <div class="card-box w-25">
+                    <div class="lead-type text-warning"><span class="lead-type-icon">🔶</span> Warm Leads</div>
+                    <h5 class="mt-2">@warmLeads</h5>
+                </div>
+                <div class="card-box w-25">
+                    <div class="lead-type text-primary"><span class="lead-type-icon">❄️</span> Cold Leads</div>
+                    <h5 class="mt-2">@coldLeads</h5>
                 </div>
             </div>
 
-            <div class="mb-3 p-3 rounded bg-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="fw-bold">Michael Chen</div>
-                        <div class="text-muted small">m.chen@email.com • +1 234-567-8902</div>
-                    </div>
-                    <div class="text-end">
-                        <div>Destination: <strong>Thailand</strong></div>
-                        <div>PAX: 8</div>
-                        <div>Budget: <span class="text-success fw-bold">$15,000</span></div>
-                    </div>
-                    <div class="lead-contact">
-                        <span class="badge-lead border border-warning text-warning">Warm</span>
-                        <button class="btn btn-outline-dark btn-sm">Contact</button>
-                        <button class="btn btn-primary btn-sm">Convert</button>
-                    </div>
-                </div>
-            </div>
 
-            <div class="mb-3 p-3 rounded bg-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="fw-bold">Emily Davis</div>
-                        <div class="text-muted small">emily.d@email.com • +1 234-567-8903</div>
-                    </div>
-                    <div class="text-end">
-                        <div>Destination: <strong>Singapore</strong></div>
-                        <div>PAX: 2</div>
-                        <div>Budget: <span class="text-success fw-bold">$4,500</span></div>
-                    </div>
-                    <div class="lead-contact">
-                        <span class="badge-lead border border-primary text-primary">Cold</span>
-                        <button class="btn btn-outline-dark btn-sm">Contact</button>
-                        <button class="btn btn-primary btn-sm">Convert</button>
-                    </div>
-                </div>
-            </div>
 
+            <div class="card-box">
+                <h5 class="fw-semibold mb-3">Recent Leads</h5>
+
+                <div id="noRecordMsg" class="alert alert-warning text-center mt-3" style="display: none;">
+                    No record present.
+                </div>
+
+                @if (Model?.Leads != null && Model.Leads.Any())
+                {
+                    @foreach (var lead in Model.Leads)
+                    {
+                        <div class="mb-3 p-3 rounded bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold">@lead.Name</div>
+                                    <div class="text-muted small">@lead.Email • @lead.Phone</div>
+                                    @if (!string.IsNullOrEmpty(lead.Notes))
+                                    {
+                                        <div class="text-muted small mt-1">Notes: @lead.Notes</div>
+                                    }
+                                </div>
+                                <div class="text-end">
+                                    <div>Destination: <strong>@(lead.Destination ?? "N/A")</strong></div>
+                                    <div>PAX: @lead.PaxCount</div>
+                                    <div>Budget: <span class="text-success fw-bold">@(lead.Budget ?? "N/A")</span></div>
+                                    @if (lead.QueryDate.HasValue)
+                                    {
+                                        <div class="text-muted small">Query Date: @lead.QueryDate.Value.ToString("MMM dd, yyyy")</div>
+                                    }
+                                </div>
+                                <div class="lead-contact">
+                                    @{
+                                        var statusClass = "border-secondary text-secondary";
+                                        var statusIcon = "⚪";
+
+                                        if (!string.IsNullOrEmpty(lead.Status))
+                                        {
+                                            switch (lead.Status.ToLower())
+                                            {
+                                                case "hot":
+                                                    statusClass = "border-danger text-danger";
+                                                    statusIcon = "🔥";
+                                                    break;
+                                                case "warm":
+                                                    statusClass = "border-warning text-warning";
+                                                    statusIcon = "🔶";
+                                                    break;
+                                                case "cold":
+                                                    statusClass = "border-primary text-primary";
+                                                    statusIcon = "❄️";
+                                                    break;
+                                            }
+                                        }
+                                    }
+
+                                    <span class="badge-lead border @statusClass">
+                                        @statusIcon @(lead.Status ?? "Unknown")
+                                    </span>
+                                    <button class="btn btn-outline-dark btn-sm">Contact</button>
+                                    <button class="btn btn-primary btn-sm">Convert</button>
+                                    <button class="btn btn-info btn-sm edit-btn" data-id="@lead.Id">Edit</button>
+
+
+                                    <button class="btn btn-danger btn-sm delete-btn" data-id="@lead.Id">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <div class="text-muted">
+                            <h6>No leads found</h6>
+                            <p>Start by adding your first lead using the "Add New Lead" button above.</p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Pagination -->
+                @if (Model != null && Model.TotalPages > 1)
+                {
+                    <nav aria-label="Lead pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <!-- Previous Page -->
+                            <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage - 1 })">Previous</a>
+                            </li>
+
+                            <!-- Page Numbers -->
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                                </li>
+                            }
+
+                            <!-- Next Page -->
+                            <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage + 1 })">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            </div>
         </div>
     </div>
-    </div>
+
     <!-- Add New Lead Modal -->
- 
     <div class="modal fade" id="addLeadModal" tabindex="-1" aria-labelledby="addLeadModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xxl modal-dialog-scrollable">
             <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
-
-                <form action="/LeadManagement/Create" method="post" class="needs-validation" >
+                <form id="leadForm" action="/LeadManagement/Create" method="post" class="needs-validation">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add New Lead</h5>
-                       
+                        <h5 class="modal-title" id="leadModalTitle">Add New Lead</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
@@ -366,7 +500,7 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Conversion Probability</label>
-                            <input name="ConversionProbability" type="number" min="0" max="100" class="form-control"  />
+                            <input name="ConversionProbability" type="number" min="0" max="100" class="form-control" />
                             <div class="invalid-feedback">Enter valid %.</div>
                         </div>
 
@@ -378,52 +512,46 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Travel Plan</label>
-                            <select name="TravelPlan" class="form-select" >
+                            <select name="TravelPlan" class="form-select">
                                 <option value="">Select travel plan</option>
                                 <option>Standard</option>
                                 <option>Premium</option>
                             </select>
-                       
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Start Date</label>
-                            <input name="StartDate" type="date" class="form-control"  />
-
+                            <input name="StartDate" type="date" class="form-control" />
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">End Date</label>
-                            <input name="EndDate" type="date" class="form-control"  />
-                 
+                            <input name="EndDate" type="date" class="form-control" />
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Budget</label>
                             <input name="Budget" type="number" min="1" class="form-control" required />
-              
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
-                            <select name="Status" class="form-select" >
+                            <select name="Status" class="form-select">
                                 <option value="">Select status</option>
                                 <option>Hot</option>
                                 <option>Warm</option>
                                 <option>Cold</option>
                             </select>
-             
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Source</label>
-                            <select name="Source" class="form-select" >
+                            <select name="Source" class="form-select">
                                 <option value="">Select source</option>
                                 <option>Website</option>
                                 <option>Referral</option>
                                 <option>Agent</option>
                             </select>
-                    
                         </div>
 
                         <div class="col-md-6">
@@ -439,16 +567,302 @@
 
                     <div class="modal-footer px-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create Lead</button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">Create Lead</button>
+
+                        <button type="button" id="updateBtn" class="btn btn-success d-none">Update Lead</button>
+
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-  
+    <!-- Edit Lead Modal Matching Add Modal (Slide-In Sidebar) -->
+
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editLeadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xxl modal-dialog-scrollable">
+            <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+                <form id="editLeadForm" onsubmit="return updateLead(event)">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Lead</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body row g-3 px-4">
+                        <input type="hidden" id="editId" name="Id">
+
+                        <div class="col-md-6">
+                            <label>Name:</label>
+                            <input type="text" id="editName" name="Name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Email:</label>
+                            <input type="email" id="editEmail" name="Email" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Phone:</label>
+                            <input type="tel" id="editPhone" name="Phone" class="form-control" pattern="\d{10}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Zone:</label>
+                            <input type="text" id="editZone" name="Zone" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Destination:</label>
+                            <input type="text" id="editDestination" name="Destination" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Number of Passengers:</label>
+                            <input type="number" id="editPaxCount" name="PaxCount" class="form-control" required min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Budget:</label>
+                            <input type="number" id="editBudget" name="Budget" class="form-control" min="0">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">GIT / FIT</label>
+                            <select name="GitFit" class="form-select" id="editGitFit" name="GitFit">
+                                <option value="">Select GIT or FIT</option>
+                                <option>GIT</option>
+                                <option>FIT</option>
+                            </select>
+                            <div class="invalid-feedback">Select GIT or FIT.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select name="Status" class="form-select" id="editStatus">
+                                <option value="">Select status</option>
+                                <option>Hot</option>
+                                <option>Warm</option>
+                                <option>Cold</option>
+                            </select>
+                        </div>
 
 
+                        <div class="col-md-6">
+                            <label class="form-label">Source</label>
+                            <select name="Source" class="form-select" id="editSource">
+                                <option value="">Select source</option>
+                                <option>Website</option>
+                                <option>Referral</option>
+                                <option>Agent</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Query Code:</label>
+                            <input type="text" id="editQueryCode" name="QueryCode" class="form-control">
+                        </div>
+                        <div class="col-md-12">
+                            <label>Notes:</label>
+                            <textarea id="editNotes" name="Notes" class="form-control"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this lead?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
+
+@* <script>
+    $('#leadSearchInput').on('keyup', function () {
+        var searchTerm = $(this).val().toLowerCase();
+
+        var hotCount = 0;
+        var warmCount = 0;
+        var coldCount = 0;
+        var visibleCount = 0;
+
+        $('.card-box').find('.bg-light').each(function () {
+            var text = $(this).text().toLowerCase();
+            var status = $(this).find('.badge-lead').text().toLowerCase();
+
+            if (text.indexOf(searchTerm) > -1) {
+                $(this).show();
+                visibleCount++;
+
+                if (status.includes('hot')) hotCount++;
+                if (status.includes('warm')) warmCount++;
+                if (status.includes('cold')) coldCount++;
+            } else {
+                $(this).hide();
+            }
+        });
+
+        // Update counts
+        $('.lead-type.text-danger').siblings('h5').text(hotCount);
+        $('.lead-type.text-warning').siblings('h5').text(warmCount);
+        $('.lead-type.text-primary').siblings('h5').text(coldCount);
+
+        // Show/Hide "No record present"
+        if (visibleCount === 0) {
+            $('#noRecordMsg').show();
+        } else {
+            $('#noRecordMsg').hide();
+        }
+    });
+
+</script> *@
+
+<!--Edit-->
+<script>
+    $(document).on('click', '.edit-btn', function () {
+        var id = $(this).data('id');
+        openEditModal(id);
+    });
+
+    function openEditModal(id) {
+        $.get('/LeadManagement/GetLeadById', { id: id }, function (data) {
+            $('#editId').val(data.id);
+            $('#editName').val(data.name);
+            $('#editEmail').val(data.email);
+            $('#editPhone').val(data.phone);
+            $('#editZone').val(data.zone);
+            $('#editDestination').val(data.destination);
+            $('#editPaxCount').val(data.paxCount);
+            $('#editBudget').val(data.budget);
+            $('#editGitFit').val(data.gitFit);
+            $('#editStatus').val(data.status);
+            $('#editSource').val(data.source);
+            $('#editQueryCode').val(data.queryCode);
+            $('#editNotes').val(data.notes);
+
+            var modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }).fail(function () {
+            alert("Failed to load lead details.");
+        });
+    }
+
+    function updateLead(e) {
+        e.preventDefault(); // Stop default form submission
+
+        const form = document.getElementById('editLeadForm');
+        if (!form.checkValidity()) {
+            form.reportValidity(); // Show native browser errors
+            return false;
+        }
+
+        var leadData = {
+            Id: parseInt($('#editId').val()),
+            Name: $('#editName').val().trim(),
+            Email: $('#editEmail').val().trim(),
+            Phone: $('#editPhone').val().trim(),
+            Zone: $('#editZone').val().trim(),
+            Destination: $('#editDestination').val().trim(),
+            PaxCount: parseInt($('#editPaxCount').val()) || 0,
+            Budget: $('#editBudget').val(),
+            GitFit: $('#editGitFit').val().trim(),
+            Status: $('#editStatus').val().trim(),
+            Source: $('#editSource').val().trim(),
+            QueryCode: $('#editQueryCode').val().trim(),
+            Notes: $('#editNotes').val().trim()
+        };
+
+        $.ajax({
+            url: '/LeadManagement/Update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(leadData),
+            success: function () {
+                $('body').append(`<div id="leadSuccessToast" class="position-fixed top-0 end-0 m-3 alert alert-success shadow-sm" style="z-index: 1055; min-width: 250px;">Lead updated successfully!</div>`);
+                setTimeout(() => {
+                    $('#leadSuccessToast').remove();
+                    location.reload();
+                }, 1000);
+
+                var modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                modal.hide();
+            },
+            error: function (xhr) {
+                alert("Update failed: " + xhr.responseText);
+            }
+        });
+    }
+
+</script>
+
+
+<!--Delete Script-->
+<script>
+    let deleteId = 0;
+
+    $(document).on("click", ".delete-btn", function () {
+        deleteId = $(this).data("id");
+        $("#deleteConfirmModal").modal("show");
+    });
+
+    $("#confirmDeleteBtn").on("click", function () {
+        if (deleteId) {
+            $.ajax({
+                url: `/LeadManagement/Delete/${deleteId}`,
+                type: "POST",
+                success: function () {
+                    $("#deleteConfirmModal").modal("hide");
+
+                    $("body").append(`<div id="leadSuccessToast" class="position-fixed top-0 end-0 m-3 alert alert-success shadow-sm" style="z-index: 1055; min-width: 250px;">
+                            Lead deleted successfully!
+                        </div>`);
+
+                    setTimeout(() => {
+                        $("#leadSuccessToast").remove();
+                        location.reload();
+                    },1000);
+                },
+                error: function () {
+                    $("#deleteConfirmModal").modal("hide");
+
+                    $("body").append(`<div id="leadErrorToast" class="position-fixed top-0 end-0 m-3 alert alert-danger shadow-sm" style="z-index: 1055; min-width: 250px;">
+                            Delete failed. Try again.
+                        </div>`);
+
+                    setTimeout(() => {
+                        $("#leadErrorToast").remove();
+                    }, 1000);
+                }
+            });
+        }
+    });
+
+
+</script>
+
+<!--Logout click-->
+<script>
+    $(document).on("click", "#logoutBtn", function () {
+        sessionStorage.clear();
+        localStorage.clear();
+        window.location.href = "/Login/Logout";
+    });
+
+</script>
+
 </html>

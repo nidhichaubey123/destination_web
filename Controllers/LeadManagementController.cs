@@ -20,36 +20,66 @@ namespace DMCPortal.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(int page = 1, string search = "")
         {
             try
             {
-                var apiUrl = $"{_apiSettings.BaseUrl}/api/leads";
+                int pageSize = 10;
+                var apiUrl = $"{_apiSettings.BaseUrl}/api/leads?search={search}&page={page}&pageSize={pageSize}";
                 var response = await _httpClient.GetAsync(apiUrl);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = await response.Content.ReadAsStringAsync();
-                    var allLeads = JsonSerializer.Deserialize<List<Lead>>(jsonString, new JsonSerializerOptions
+
+                    var result = JsonSerializer.Deserialize<LeadApiResponse>(jsonString, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
 
-                    int pageSize = 10;
-                    int totalLeads = allLeads?.Count ?? 0;
-                    int totalPages = (int)Math.Ceiling(totalLeads / (double)pageSize);
+                    var allLeads = result.Leads.Select(q => new Lead
+                    {
+                        Id = q.Id,
+                        Name = q.Name,
+                        Email = q.Email,
+                        Phone = q.Phone,
+                        QueryDate = q.QueryDate,
+                        Zone = q.Zone,
+                        Destination = q.Destination,
+                        PaxCount = q.PaxCount,
+                        Budget = q.Budget.ToString(),
+                        GitFit = q.GitFit,
+                        Status = q.Status,
+                        Source = q.Source,
+                        OriginatedBy = q.OriginatedBy,
+                        AgentID = q.AgentID,
+                        ConversionProbability = q.ConversionProbability?.ToString(),
+                        TravelPlan = q.TravelPlans,
+                        StartDate = q.StartDate,
+                        EndDate = q.EndDate,
+                        WhyLost = q.WhyLost,
+                        Notes = q.Notes,
+                        QuoteUrl = q.QuoteUrl,
+                        LastReplied = q.LastReplied,
+                        ReminderDate = q.ReminderDate,
+                        ConfirmationCode = q.ConfirmationCode,
+                        FinalPax = q.FinalPax,
+                        CostSheetLink = q.CostSheetLink,
+                        EndClient = q.EndClient,
+                        ReservationLead = q.ReservationLead,
+                        ReminderOverdue = q.ReminderOverdue,
+                        QueryCode = q.QueryCode,
+                        HandledBy = q.HandledBy
+                    }).ToList();
 
-                    var paginatedLeads = allLeads
-                        .OrderByDescending(l => l.QueryDate)
-                        .Skip((page - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
+                    int totalPages = (int)Math.Ceiling(result.TotalRecords / (double)pageSize);
 
                     var viewModel = new PaginatedLeadViewModel
                     {
-                        Leads = paginatedLeads,
+                        Leads = allLeads,
                         CurrentPage = page,
-                        TotalPages = totalPages
+                        TotalPages = totalPages,
+                        SearchTerm = search
                     };
 
                     return View(viewModel);
@@ -60,7 +90,7 @@ namespace DMCPortal.Web.Controllers
                     return View(new PaginatedLeadViewModel());
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 TempData["Error"] = "Something went wrong!";
                 return View(new PaginatedLeadViewModel());
@@ -86,31 +116,18 @@ namespace DMCPortal.Web.Controllers
                     Phone = model.Phone,
                     QueryDate = model.QueryDate?.ToString("yyyy-MM-ddTHH:mm:ss"),
                     Zone = model.Zone,
-                    Destination = model.Destination,
-                    PaxCount = model.PaxCount,
-                    Budget = model.Budget?.ToString(),
-
                     GitFit = model.GitFit,
-                    Status = model.Status,
-                    Source = model.Source,
-                    OriginatedBy = model.OriginatedBy,
-                    AgentID = model.AgentID,
-                    ConversionProbability = model.ConversionProbability?.ToString(),
-                    TravelPlans = model.TravelPlan,
+                    Destination = model.Destination,
+                    ConversionProbability = model.ConversionProbability,
+                    PaxCount = model.PaxCount,
+                    TravelPlan = model.TravelPlan,
                     StartDate = model.StartDate?.ToString("yyyy-MM-ddTHH:mm:ss"),
                     EndDate = model.EndDate?.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    WhyLost = model.WhyLost,
-                    Notes = model.Notes,
-                    QuoteUrl = model.QuoteUrl,
-                    LastReplied = model.LastReplied?.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    ReminderDate = model.ReminderDate?.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    ConfirmationCode = model.ConfirmationCode,
-                    FinalPax = model.FinalPax,
-                    CostSheetLink = model.CostSheetLink,
-                    EndClient = model.EndClient,
-                    ReservationLead = model.ReservationLead,
-                    ReminderOverdue = model.ReminderOverdue,
-                    QueryCode = model.QueryCode
+                    Budget = model.Budget,
+                    Status = model.Status,
+                    Source = model.Source,
+                    QueryCode = model.QueryCode,
+                    Notes = model.Notes
                 };
 
                 var json = JsonSerializer.Serialize(leadData);
@@ -136,5 +153,122 @@ namespace DMCPortal.Web.Controllers
 
             return RedirectToAction("Index");
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var apiUrl = $"{_apiSettings.BaseUrl}/api/leads/{id}";
+
+                var response = await _httpClient.DeleteAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode(500, "Deletion failed. API responded with error.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Server error: {ex.Message}");
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> Update([FromBody] Lead model)
+        {
+            if (model == null || model.Id <= 0)
+                return BadRequest("Invalid data");
+
+            try
+            {
+                var apiPayload = new
+                {
+                    Id = model.Id,
+                    Name = model.Name,
+                    Email = model.Email,
+                    Phone = model.Phone,
+                    Zone = model.Zone,
+                    Destination = model.Destination,
+                    PaxCount = model.PaxCount,
+                    Budget = string.IsNullOrEmpty(model.Budget) ? (decimal?)null : decimal.Parse(model.Budget),
+                    Status = model.Status,
+                    Source = model.Source,
+                    QueryCode = model.QueryCode,
+                    Notes = model.Notes,
+
+                    GitFit = model.GitFit
+                };
+
+                var json = JsonSerializer.Serialize(apiPayload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var apiUrl = $"{_apiSettings.BaseUrl}/api/leads/update";
+                var response = await _httpClient.PostAsync(apiUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                    return Ok();
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return StatusCode(500, "API update failed: " + errorContent);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Server error: " + ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetLeadById(int id)
+        {
+            var apiUrl = $"{_apiSettings.BaseUrl}/api/leads/{id}";
+            var response = await _httpClient.GetAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+
+                var apiLead = JsonSerializer.Deserialize<TruvaiQuery>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (apiLead == null)
+                    return StatusCode(500, "Lead not found");
+
+                // Map to lowercase properties
+                return Json(new
+                {
+                    id = apiLead.Id,
+                    name = apiLead.Name,
+                    email = apiLead.Email,
+                    phone = apiLead.Phone,
+                    queryDate = apiLead.QueryDate.ToString("yyyy-MM-dd"),
+                    zone = apiLead.Zone,
+                    gitFit = apiLead.GitFit,
+                    destination = apiLead.Destination,
+                    conversionProbability = apiLead.ConversionProbability,
+                    paxCount = apiLead.PaxCount,
+                    travelPlan = apiLead.TravelPlans,
+                    startDate = apiLead.StartDate?.ToString("yyyy-MM-dd"),
+                    endDate = apiLead.EndDate?.ToString("yyyy-MM-dd"),
+                    budget = apiLead.Budget,
+                    status = apiLead.Status,
+                    source = apiLead.Source,
+                    queryCode = apiLead.QueryCode,
+                    notes = apiLead.Notes
+                });
+            }
+
+            return StatusCode(500, "Failed to load lead details");
+        }
+
+
+
     }
 }

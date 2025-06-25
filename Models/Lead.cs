@@ -4,17 +4,20 @@ namespace DMCPortal.Web.Models
 {
     using System.ComponentModel.DataAnnotations;
 
+    using System.ComponentModel.DataAnnotations;
+
     namespace DMCPortal.Web.Models
     {
         public class Lead
         {
+            public int Id { get; set; }
             [Required]
             public string Name { get; set; }
 
             [Required, EmailAddress]
             public string Email { get; set; }
 
-            [Required, Phone]
+            [Required, RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be 10 digits")]
             public string Phone { get; set; }
 
             [Required]
@@ -32,7 +35,7 @@ namespace DMCPortal.Web.Models
             [Required]
             public string Budget { get; set; }
 
-            // ✅ Optional properties
+            // Optional properties
             public string? GitFit { get; set; }
             public string? Status { get; set; }
             public string? Source { get; set; }
@@ -57,6 +60,5 @@ namespace DMCPortal.Web.Models
             public string? HandledBy { get; set; }
         }
     }
-
 
 }

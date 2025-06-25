@@ -5,6 +5,7 @@
     <title>DMC Portal - User Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+ 
     <style>
         body {
             background-color: #f8f9fa;
@@ -58,8 +59,8 @@
             color: #fff;
             font-weight: bold;
             font-size: 14px;
-            width: 32px;
-            height: 32px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -82,6 +83,12 @@
             border-right: 1px solid #dee2e6;
             padding: 20px;
         }
+
+            .sidebar .list-group-item.active {
+                background-color: #0d6efd; /* Bootstrap Primary Blue */
+                color: white;
+                font-weight: bold;
+            }
 
             .sidebar a {
                 display: block;
@@ -123,6 +130,7 @@
             align-items: center;
             justify-content: space-between;
             min-height: 100px;
+            border: 1px solid #0d6efd
         }
 
         .user-info-section {
@@ -315,6 +323,14 @@
 </head>
 <body>
 
+
+    @{
+        var firstName = User.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? "User";
+        var lastName = User.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? "";
+        var initials = (string.IsNullOrEmpty(firstName) ? "" : firstName.Substring(0, 1).ToUpper()) +
+        (string.IsNullOrEmpty(lastName) ? "" : lastName.Substring(0, 1).ToUpper());
+    }
+
     <!-- Top Header -->
     <div class="top-header">
         <div class="header-left">
@@ -326,38 +342,55 @@
                 <i class="fas fa-bell"></i>
                 <span class="text-muted ms-1">Notifications</span>
             </div>
-            <div class="user-info">
-                <div class="user-avatar">JD</div>
-                <span class="user-name">John Doe</span>
+            <div class="user-info dropdown">
+                <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    @initials
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><span class="dropdown-item-text">@firstName @lastName</span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="javascript:void(0)" id="logoutBtn">Logout</a>
+                    </li>
+                </ul>
             </div>
+
         </div>
     </div>
 
     <div class="main-container">
         <div class="sidebar">
-            <a href="@Url.Action("Index", "Dashboard")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "Dashboard")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Dashboard" ? "active" : "")">
                 📊 Dashboard
             </a>
 
+            <a href="@Url.Action("Index", "Trip")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Trip" ? "active" : "")">
+                ✈️ Trip Management
+            </a>
 
-            <a href="/Trip/Index" class="list-group-item list-group-item-action">✈️ Trip Management</a>
-
-            <a href="@Url.Action("Index", "LeadManagement")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "LeadManagement")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "LeadManagement" ? "active" : "")">
                 👥 Lead Management
             </a>
 
-            <a href="@Url.Action("Index", "UserManagement")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "UserManagement")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "UserManagement" ? "active" : "")">
                 👤 User Management
             </a>
 
-            <a href="@Url.Action("Index", "Role")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "Role")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Role" ? "active" : "")">
                 👤 Role Management
             </a>
 
-            <a href="@Url.Action("Index", "Operation")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "Operation")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Operation" ? "active" : "")">
                 👤 Operation Management
             </a>
         </div>
+
 
         <!-- Main Content -->
         <div class="content-area">
@@ -367,7 +400,7 @@
             <div id="successMessage" class="alert alert-success d-none"></div>
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center gap-3" style="flex: 1;">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search users..." style="width:28%;">
+                    <input type="text" id="SearchInput" class="form-control" placeholder="Search users..." style="width:28%;">
                     <button class="btn btn-outline-primary" style="min-width: 130px;">Filter by Role</button>
                     <button class="btn btn-outline-secondary" style="min-width: 130px;">Export Users</button>
                 </div>
@@ -379,7 +412,8 @@
             <div class="row text-center mb-4">
                 <div class="col">
                     <div class="card-counter">
-                        <h4 style="color:blue;"><b>12</b></h4>
+                        <h4 style="color:blue;"><b id="totalUsersCount">0</b></h4>
+
                         <p>Total Users</p>
                     </div>
                 </div>
@@ -405,6 +439,10 @@
 
             <!-- System Users -->
             <h5><b>System Users</b></h5>
+            <div id="noUserMsg" class="alert alert-warning text-center mt-3" style="display: none;">
+                No record present.
+            </div>
+
             <div id="usersContainer" class="d-flex flex-column gap-3">
                 <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
             </div>
@@ -457,7 +495,7 @@
             </div>
         </div>
     </div>
-    <!-- Add Edit User Modal -->
+  
     <!-- Add Edit User Modal -->
     <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -499,6 +537,26 @@
         </div>
     </div>
 
+
+    <!-- User Delete Confirmation Modal -->
+    <div class="modal fade" id="userDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirm User Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this user along with their assigned roles?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmUserDeleteBtn" class="btn btn-danger">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @{
         var userOperations = User.Claims
         .Where(c => c.Type == "Operation")
@@ -517,6 +575,9 @@
         const hasEditPermission = @canEdit.ToString().ToLower();
         const hasDeletePermission = @canDelete.ToString().ToLower();
     </script>
+
+
+
 
     <script>
         // Open edit modal and populate data
@@ -586,7 +647,7 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById("editUserModal"));
             modal.hide();
             $('#successMessage').text(res.message || 'User updated successfully').removeClass("d-none");
-            setTimeout(() => location.reload(), 1500);
+            setTimeout(() => location.reload(), 1000);
         },
         error: function (xhr) {
             const errorResponse = xhr.responseJSON;
@@ -603,13 +664,15 @@
 
 
 
+
     <script>
         const apiBaseUrl = "https://localhost:7228";
         let selectedUserId = null;
 
         // Load users and render cards
-        window.loadUsers = function (page = 1, pageSize = 10) {
+        window.loadUsers = function (page = 1, pageSize = 10, searchTerm = "") {
             $('#usersContainer').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
+            $("#noUserMsg").hide();
 
             $.ajax({
                 url: `${apiBaseUrl}/api/User`,
@@ -620,9 +683,23 @@
                         return;
                     }
 
-                    const totalPages = Math.ceil(data.length / pageSize);
+                    // Filter by search term
+                    const filteredData = data.filter(user =>
+                        (user.firstName?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+                        (user.lastName?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+                        (user.emailAddress?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+                        (user.mobileNo?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
+                    );
+
+                    if (!filteredData.length) {
+                        $('#usersContainer').empty();
+                        $('#noUserMsg').show();
+                        return;
+                    }
+
+                    const totalPages = Math.ceil(filteredData.length / pageSize);
                     const start = (page - 1) * pageSize;
-                    const usersToShow = data.slice(start, start + pageSize);
+                    const usersToShow = filteredData.slice(start, start + pageSize);
 
                     let html = '';
                     usersToShow.forEach(user => {
@@ -632,69 +709,55 @@
                         ).join('');
 
                         html += `
-            <div class="user-card">
-                <div class="user-info-section">
-                    <div class="user-initial">${initials.toUpperCase()}</div>
-                    <div class="user-details">
-                        <div class="user-name-text">${user.firstName} ${user.lastName}</div>
-                        <div class="user-email">${user.emailAddress}</div>
-                    </div>
-                </div>
-                <div class="user-metadata">
-                    <div class="metadata-group">
-                        <div class="metadata-label">Role:</div>
-                        <div class="metadata-value" id="roleColumn-${user.userId}">
-                            ${rolesHtml || '<span class="text-muted">No roles</span>'}
-                        </div>
-                    </div>
-                    <div class="metadata-group">
-                        <div class="metadata-label">Mobile No:</div>
-                        <div class="metadata-value">${user.mobileNo ?? '-'}</div>
-                    </div>
-                    <div class="metadata-group">
-                        <div class="metadata-label">Last Login:</div>
-                        <div class="metadata-value">${user.lastLoggedOn?.substring(0, 10) ?? '-'}</div>
-                    </div>
-                    <div class="metadata-group">
-                        <div class="metadata-label">Status:</div>
-                        <div class="metadata-value">
-                                  <span class="status-badge ${user.userIsActive ? 'status-active' : 'status-inactive'}">
-            ${user.userIsActive ? 'Active' : 'Inactive'}
-        </span>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="user-actions">
-                    <button class="btn btn-outline-success btn-sm assign-role-btn"
-                            data-userid="${user.userId}"
-                            data-bs-toggle="modal"
-                            data-bs-target="#assignRoleModal">
-                        Assign Role
-                    </button>
-
-                    ${hasEditPermission ? `<button class="btn btn-edit" data-userid="${user.userId}">Edit</button>` : ''}
-        ${hasDeletePermission ? `<button class="btn btn-delete btn-delete-user" data-userid="${user.userId}">Delete</button>` : ''}
-
-
-                       <button class="btn ${user.userIsActive ? 'btn-deactivate' : 'btn-activate'} toggle-status-btn"
-            data-userid="${user.userId}"
-            data-currentstatus="${user.userIsActive}">
-            ${user.userIsActive ? 'Deactivate' : 'Activate'}
-        </button>
-
-
-                </div>
-            </div>`;
-
+                        <div class="user-card">
+                            <div class="user-info-section">
+                                <div class="user-initial">${initials.toUpperCase()}</div>
+                                <div class="user-details">
+                                    <div class="user-name-text">${user.firstName} ${user.lastName}</div>
+                                    <div class="user-email">${user.emailAddress}</div>
+                                </div>
+                            </div>
+                            <div class="user-metadata">
+                                <div class="metadata-group">
+                                    <div class="metadata-label">Role:</div>
+                                    <div class="metadata-value" id="roleColumn-${user.userId}">
+                                        ${rolesHtml || '<span class="text-muted">No roles</span>'}
+                                    </div>
+                                </div>
+                                <div class="metadata-group">
+                                    <div class="metadata-label">Mobile No:</div>
+                                    <div class="metadata-value">${user.mobileNo ?? '-'}</div>
+                                </div>
+                                <div class="metadata-group">
+                                    <div class="metadata-label">Last Login:</div>
+                                    <div class="metadata-value">${user.lastLoggedOn?.substring(0, 10) ?? '-'}</div>
+                                </div>
+                                <div class="metadata-group">
+                                    <div class="metadata-label">Status:</div>
+                                    <div class="metadata-value">
+                                        <span class="status-badge ${user.userIsActive ? 'status-active' : 'status-inactive'}">
+                                        ${user.userIsActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <button class="btn btn-outline-success btn-sm assign-role-btn" data-userid="${user.userId}" data-bs-toggle="modal" data-bs-target="#assignRoleModal">
+                                    Assign Role
+                                </button>
+                                ${hasEditPermission ? `<button class="btn btn-edit" data-userid="${user.userId}">Edit</button>` : ''}
+                                ${hasDeletePermission ? `<button class="btn btn-delete btn-delete-user" data-userid="${user.userId}">Delete</button>` : ''}
+                                <button class="btn ${user.userIsActive ? 'btn-deactivate' : 'btn-activate'} toggle-status-btn" data-userid="${user.userId}" data-currentstatus="${user.userIsActive}">
+                                    ${user.userIsActive ? 'Deactivate' : 'Activate'}
+                                </button>
+                            </div>
+                        </div>`;
                     });
 
-                    // Pagination
                     let pagination = `<nav><ul class="pagination justify-content-center mt-3">`;
                     for (let i = 1; i <= totalPages; i++) {
                         pagination += `<li class="page-item ${i === page ? 'active' : ''}">
-                                <a class="page-link" href="#" data-page="${i}">${i}</a>
-                            </li>`;
+                            <a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
                     }
                     pagination += `</ul></nav>`;
 
@@ -741,7 +804,7 @@
                             // Reload page after registration
                             setTimeout(() => {
                                 location.reload();
-                            }, 1500);
+                            }, 1000);
                         } else {
                             $('#registerModalBody').html(result); // show validation errors
                         }
@@ -755,21 +818,32 @@
             $(document).on('click', '.pagination .page-link', function (e) {
                 e.preventDefault();
                 const page = parseInt($(this).data('page'));
-                loadUsers(page);
+                const searchTerm = $('#SearchInput').val();
+                loadUsers(page, 10, searchTerm);
             });
 
-            // Delete user
+
+
+            let deleteUserId = 0;
+
             $(document).on('click', '.btn-delete-user', function () {
-                const userId = $(this).data('userid');
-                if (confirm("Are you sure you want to delete this user and their roles?")) {
+                deleteUserId = $(this).data('userid');
+                $("#userDeleteModal").modal('show');
+            });
+
+            $("#confirmUserDeleteBtn").on('click', function () {
+                if (deleteUserId) {
                     $.ajax({
-                        url: `${apiBaseUrl}/api/User/${userId}`,
+                        url: `${apiBaseUrl}/api/User/${deleteUserId}`,
                         type: 'DELETE',
                         success: function () {
+                            $("#userDeleteModal").modal('hide');
                             $('#successMessage').text("User deleted successfully").removeClass("d-none");
+
                             setTimeout(() => location.reload(), 1000);
                         },
                         error: function () {
+                            $("#userDeleteModal").modal('hide');
                             alert("Failed to delete user.");
                         }
                     });
@@ -833,7 +907,7 @@
                         $('#successMessage').text(res.message).removeClass("d-none");
                         setTimeout(() => {
                             location.reload();
-                        }, 1500);
+                        }, 1000);
                     },
                     error: function (xhr) {
                         alert("Error: " + xhr.responseText);
@@ -867,7 +941,22 @@
         });
     </script>
 
- 
+    <script>
+                $('#SearchInput').on('keyup', function () {
+            const searchTerm = $(this).val();
+            loadUsers(1, 10, searchTerm);
+        });
+</script>
+
+    <!--Logout click-->
+ <script>
+        $(document).on("click", "#logoutBtn", function () {
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.href = "/Login/Logout";
+        });
+
+ </script>
 
 
 </body>

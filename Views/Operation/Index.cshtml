@@ -9,6 +9,8 @@
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -62,8 +64,8 @@
             color: #fff;
             font-weight: bold;
             font-size: 14px;
-            width: 32px;
-            height: 32px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -107,11 +109,21 @@
             overflow-y: auto;
         }
 
+        .sidebar .list-group-item.active {
+            background-color: #0d6efd; /* Bootstrap Primary Blue */
+            color: white;
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
-
+    @{
+        var firstName = User.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? "User";
+        var lastName = User.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? "";
+        var initials = (string.IsNullOrEmpty(firstName) ? "" : firstName.Substring(0, 1).ToUpper()) +
+        (string.IsNullOrEmpty(lastName) ? "" : lastName.Substring(0, 1).ToUpper());
+    }
     <!-- Top Header -->
     <div class="top-header">
         <div class="header-left">
@@ -123,38 +135,54 @@
                 <i class="fas fa-bell"></i>
                 <span class="text-muted ms-1">Notifications</span>
             </div>
-            <div class="user-info">
-                <div class="user-avatar">JD</div>
-                <span class="user-name">John Doe</span>
+            <div class="user-info dropdown">
+                <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    @initials
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><span class="dropdown-item-text">@firstName @lastName</span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="javascript:void(0)" id="logoutBtn">Logout</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
     <div class="main-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <a href="@Url.Action("Index", "Dashboard")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "Dashboard")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Dashboard" ? "active" : "")">
                 📊 Dashboard
             </a>
 
+            <a href="@Url.Action("Index", "Trip")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Trip" ? "active" : "")">
+                ✈️ Trip Management
+            </a>
 
-            <a href="/Trip/Index" class="list-group-item list-group-item-action">✈️ Trip Management</a>
-
-            <a href="@Url.Action("Index", "LeadManagement")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "LeadManagement")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "LeadManagement" ? "active" : "")">
                 👥 Lead Management
             </a>
 
-            <a href="@Url.Action("Index", "UserManagement")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "UserManagement")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "UserManagement" ? "active" : "")">
                 👤 User Management
             </a>
 
-            <a href="@Url.Action("Index", "Role")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "Role")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Role" ? "active" : "")">
                 👤 Role Management
             </a>
 
-            <a href="@Url.Action("Index", "Operation")" class="list-group-item list-group-item-action">
+            <a href="@Url.Action("Index", "Operation")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Operation" ? "active" : "")">
                 👤 Operation Management
             </a>
         </div>
+
         <div class="content-area d-flex justify-content-center">
             <div class="w-100" style="max-width: 90%;">
 
@@ -203,6 +231,26 @@
             <tbody></tbody>
         </table>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this operation?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
     <script>
         $(document).ready(function () {
@@ -268,15 +316,31 @@
                 });
             });
 
-            $(document).on('click', '.deleteBtn', function () {
-                if (!confirm("Are you sure?")) return;
-                const id = $(this).data('id');
-                $.post(`/Operation/Delete/${id}`, function () {
-                    loadTable();
-                });
-            });
+                    let deleteOperationId = 0;
+
+                    $(document).on('click', '.deleteBtn', function () {
+                        deleteOperationId = $(this).data('id');
+                        $('#deleteConfirmModal').modal('show');
+                    });
+
+                    $('#confirmDeleteBtn').click(function () {
+                        $.post(`/Operation/Delete/${deleteOperationId}`, function () {
+                            $('#deleteConfirmModal').modal('hide');
+                            loadTable();
+                        });
+                    });
         });
     </script>
+            <!--Logout click-->
+            <script>
+                $(document).on("click", "#logoutBtn", function () {
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    window.location.href = "/Login/Logout";
+                });
 
+            </script>
 </body>
+
+<
 </html>

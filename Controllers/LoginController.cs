@@ -54,7 +54,9 @@ namespace DMCPortal.Web.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, request.EmailAddress),
-                    new Claim("SessionId", result.SessionId.ToString())
+                    new Claim("SessionId", result.SessionId.ToString()),
+                      new Claim("FirstName", result.FirstName ?? ""),
+    new Claim("LastName", result.LastName ?? "")
                 };
 
                 // ✅ Add each operation name as a claim
@@ -85,5 +87,24 @@ namespace DMCPortal.Web.Controllers
                 return View(request);
             }
         }
+
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            // Optional: Delete from DB if you store session there
+            var sessionId = User.Claims.FirstOrDefault(c => c.Type == "SessionId")?.Value;
+
+            if (!string.IsNullOrEmpty(sessionId))
+            {
+                using var client = new HttpClient { BaseAddress = new Uri(_apiSettings.BaseUrl) };
+                await client.DeleteAsync($"api/User/DeleteSession/{sessionId}");
+            }
+
+            // Clear Auth cookie
+            await HttpContext.SignOutAsync("MyCookieAuth");
+
+            return RedirectToAction("Index", "Login");
+        }
+
     }
 }
