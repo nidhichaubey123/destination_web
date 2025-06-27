@@ -28,7 +28,7 @@ builder.Services.AddAuthentication("MyCookieAuth")
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
-
+app.MapDefaultControllerRoute();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

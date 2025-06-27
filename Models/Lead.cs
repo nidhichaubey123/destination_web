@@ -4,10 +4,7 @@ namespace DMCPortal.Web.Models
 {
     using System.ComponentModel.DataAnnotations;
 
-    using System.ComponentModel.DataAnnotations;
-
-    namespace DMCPortal.Web.Models
-    {
+   
         public class Lead
         {
             public int Id { get; set; }
@@ -61,4 +58,3 @@ namespace DMCPortal.Web.Models
         }
     }
 
-}

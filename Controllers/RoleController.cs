@@ -8,6 +8,7 @@ namespace DMCPortal.Web.Controllers
     public class RoleController : Controller
     {
         private readonly HttpClient _client;
+  
 
         public RoleController(IHttpClientFactory httpClientFactory)
         {

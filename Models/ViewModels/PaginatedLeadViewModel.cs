@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using DMCPortal.Web.Models;
-using DMCPortal.Web.Models.DMCPortal.Web.Models;
+
 
 namespace DMCPortal.Web.Models.ViewModels
 {

@@ -2,67 +2,222 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DMCPortal.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DMCPortal.Web.styles.css" asp-append-version="true" />
+    <title>DMC Portal - @ViewData["Title"]</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/jquery.validate.unobtrusive.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
 
-    <!-- jQuery (must be before Bootstrap JS) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/jquery.validate.unobtrusive.min.js"></script>
+        .top-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
+        .header-left h5 {
+            margin: 0;
+            color: #0d6efd;
+        }
 
+        .header-left p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-icon {
+            position: relative;
+            color: #6c757d;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+            .notification-icon:hover {
+                color: #0d6efd;
+            }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .list-group-item.active {
+            background-color: #0d6efd; /* Bootstrap Primary Blue */
+            color: white;
+            font-weight: bold;
+        }
+
+        .sidebar .list-group-item.active {
+            background-color: #0d6efd; /* Bootstrap Primary Blue */
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-avatar {
+            background-color: #0d6efd;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #ffffff;
+            border-right: 1px solid #dee2e6;
+            padding: 20px;
+        }
+
+            .sidebar a {
+                display: block;
+                padding: 12px 10px;
+                margin-bottom: 8px;
+                color: #000;
+                text-decoration: none;
+                border-radius: 8px;
+            }
+
+                .sidebar a.active, .sidebar a:hover {
+                    background-color: #e9ecef;
+                    font-weight: bold;
+                }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">DMCPortal.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+    @{
+        var firstName = User.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value ?? "User";
+        var lastName = User.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value ?? "";
+        var initials = (string.IsNullOrEmpty(firstName) ? "" : firstName.Substring(0, 1).ToUpper()) +
+        (string.IsNullOrEmpty(lastName) ? "" : lastName.Substring(0, 1).ToUpper());
+    }
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="header-left">
+            <h5><b>DMC Portal</b></h5>
+            <p class="text-muted">Travel Management System</p>
+        </div>
+        <div class="header-right">
+            <div class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="text-muted ms-1">Notifications</span>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+            <div class="user-info dropdown">
+                <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    @initials
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><span class="dropdown-item-text">@firstName @lastName</span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="javascript:void(0)" id="logoutBtn">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - DMCPortal.Web - <a asp-area="" asp-page="/Privacy">Privacy</a>
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="@Url.Action("Index", "Dashboard")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Dashboard" ? "active" : "")">
+                📊 Dashboard
+            </a>
+
+            <a href="@Url.Action("Index", "Trip")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Trip" ? "active" : "")">
+                ✈️ Trip Management
+            </a>
+
+            <a href="@Url.Action("Index", "LeadManagement")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "LeadManagement" ? "active" : "")">
+                👥 Lead Management
+            </a>
+
+            <a href="@Url.Action("Index", "UserManagement")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "UserManagement" ? "active" : "")">
+                👤 User Management
+            </a>
+
+         <a href="@Url.Action("Index", "Role")"
+   class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Role" ? "active" : "")">
+    🛡️ Role Management
+</a>
+
+            <a href="@Url.Action("Index", "Operation")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Operation" ? "active" : "")">
+                ⚙️ Operation Management
+            </a>
+
+            <a href="@Url.Action("Index", "DiscussionType")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "DiscussionType" ? "active" : "")">
+                💬 Discussion Type
+            </a>
+
+            <a href="@Url.Action("Index", "MeetingType")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "MeetingType" ? "active" : "")">
+                📝 Meeting Type
+            </a>
+
+            <a href="@Url.Action("Index", "SalesVisit")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "SalesVisit" ? "active" : "")">
+                🚗 Sales Visit
+            </a>
         </div>
-    </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+        <div class="content-area w-100 p-3">
+            @RenderBody()
+        </div>
+    </div>
+
 </body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+
+<script>
+    $(document).on("click", "#logoutBtn", function () {
+        sessionStorage.clear();
+        localStorage.clear();
+        window.location.href = "/Login/Logout";
+    });
+</script>
 </html>

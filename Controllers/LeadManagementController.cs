@@ -1,5 +1,5 @@
 ﻿using DMCPortal.Web.Models;
-using DMCPortal.Web.Models.DMCPortal.Web.Models;
+
 using DMCPortal.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

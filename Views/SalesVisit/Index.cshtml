@@ -1,0 +1,693 @@
+﻿@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+@model List<DMCPortal.Web.Models.SalesVisit>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Visit Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        .header {
+            background-color: #0066cc;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+            .header h4 {
+                margin: 0;
+                font-weight: 600;
+            }
+
+       
+
+        .stats-row {
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0066cc;
+            margin: 0;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .modal-header {
+            background-color: #0066cc;
+            color: white;
+        }
+
+            .modal-header .btn-close {
+                filter: invert(1);
+            }
+
+        .form-control {
+            border-radius: 6px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="header d-flex justify-content-between align-items-center">
+            <h4>Sales Visit Management</h4>
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#addModal" style="background-color:white;">
+                + Add Sales Visit
+            </button>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row stats-row">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <h3 class="stat-number">@Model.Count()</h3>
+                    <p class="stat-label">Total Visits</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <h3 class="stat-number">@Model.Count(x => x.VisitDate.Date == DateTime.Today)</h3>
+                    <p class="stat-label">Today's Visits</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <h3 class="stat-number">@Model.Count(x => x.VisitDate >= DateTime.Today.AddDays(-7))</h3>
+                    <p class="stat-label">This Week</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <h3 class="stat-number">@Model.Count(x => x.VisitDate >= DateTime.Today.AddDays(-30))</h3>
+                    <p class="stat-label">This Month</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User ID</th>
+                        <th>Visit Date</th>
+                        <th>Visit Time</th>
+                        <th>Venue</th>
+                        <th>Notes</th>
+                        <th>Code</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.SalesVisitId</td>
+                            <td>@item.UserId</td>
+                            <td>@item.VisitDate.ToShortDateString()</td>
+                            <td>@item.VisitTime</td>
+                            <td>@item.MeetingVenueName</td>
+                            <td>@item.MeetingNotes</td>
+                            <td>@item.SalesVisitCode</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning me-1" onclick="editVisit(@item.SalesVisitId, this)">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteVisit(@item.SalesVisitId)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Modal -->
+    <!-- Add Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="addVisitForm">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">Add New Sales Visit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">User</label>
+                            <select name="UserId" id="userDropdown" class="form-select" required></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Visit Date</label>
+                            <input name="VisitDate" type="date" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Visit Time</label>
+                            <input name="VisitTime" type="time" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Agent</label>
+                            <select name="AgentId" id="agentDropdown" class="form-select" required></select>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label class="form-label">Discussion Type</label>
+                            <select name="DiscussionTypeId" id="discussionDropdown" class="form-select" required></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Meeting Type</label>
+                            <select name="MeetingTypeId" id="meetingDropdown" class="form-select" required></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Venue Name</label>
+                            <input name="MeetingVenueName" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Latitude</label>
+                            <input name="MeetingLatitude" type="number" step="0.000001" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Longitude</label>
+                            <input name="MeetingLongitude" type="number" step="0.000001" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Meeting Notes</label>
+                            <textarea name="MeetingNotes" class="form-control" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Sales Visit Code</label>
+                            <input name="SalesVisitCode" class="form-control" />
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editVisitForm" method="post" action="@Url.Action("Edit","SalesVisit")">
+                    @Html.AntiForgeryToken()
+                    <input name="SalesVisitId" type="hidden" id="editSalesVisitId" />
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Sales Visit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label">User</label>
+                            <select name="UserId" class="form-select" id="editUserDropdown" required></select>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label">Visit Date</label>
+                                <input name="VisitDate" type="date" class="form-control" id="editVisitDate" required />
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Visit Time</label>
+                                <input name="VisitTime" type="time" class="form-control" id="editVisitTime" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Agent</label>
+                            <select name="AgentId" id="editAgentDropdown" class="form-select"></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Meeting Type</label>
+                            <select name="MeetingTypeId" class="form-select" id="editMeetingTypeDropdown"></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Discussion Type</label>
+                            <select name="DiscussionTypeId" class="form-select" id="editDiscussionTypeDropdown"></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Venue Name</label>
+                            <input name="MeetingVenueName" class="form-control" id="editVenue" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Latitude</label>
+                            <input name="MeetingLatitude" type="number" step="0.000001" class="form-control" id="editLatitude" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Longitude</label>
+                            <input name="MeetingLongitude" type="number" step="0.000001" class="form-control" id="editLongitude" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Meeting Notes</label>
+                            <textarea name="MeetingNotes" class="form-control" id="editNotes" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Sales Visit Code</label>
+                            <input name="SalesVisitCode" class="form-control" id="editCode" />
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" id="updateVisitBtn" class="btn btn-success">Update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script>
+        // Set current datetime when add modal is opened
+        $('#addModal').on('show.bs.modal', function () {
+            const now = new Date();
+            const isoString = now.toISOString();
+            document.getElementById('createdOn').value = isoString;
+        });
+        function editVisit(id, btn) {
+            const editButton = btn;
+            const originalText = editButton.innerHTML;
+            editButton.innerHTML = 'Loading...';
+            editButton.disabled = true;
+
+            fetch(`https://localhost:7228/api/SalesVisit/${id}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    loadDropdowns(() => {
+                        $('#editSalesVisitId').val(data.salesVisitId);
+                        $('#editUserDropdown').val(data.userId);
+                        $('#editVisitDate').val(data.visitDate ? new Date(data.visitDate).toISOString().split('T')[0] : '');
+                        $('#editVisitTime').val(data.visitTime || '');
+                        $('#editAgentDropdown').val(data.agentId || '');
+                        $('#editMeetingTypeDropdown').val(data.meetingTypeId || '');
+                        $('#editDiscussionTypeDropdown').val(data.discussionTypeId || '');
+                        $('#editVenue').val(data.meetingVenueName || '');
+                        $('#editLatitude').val(data.meetingLatitude ?? '');
+                        $('#editLongitude').val(data.meetingLongitude ?? '');
+                        $('#editNotes').val(data.meetingNotes || '');
+                        $('#editCode').val(data.salesVisitCode || '');
+
+                        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                        editModal.show();
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error loading sales visit data');
+                })
+                .finally(() => {
+                    editButton.innerHTML = originalText;
+                    editButton.disabled = false;
+                });
+        }
+
+
+        // Handle form submission with better error handling
+        document.getElementById('editVisitForm').addEventListener('submit', function (e) {
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.innerHTML = 'Updating...';
+            submitButton.disabled = true;
+        });
+
+        // Reset button state when modal is hidden
+        $('#editModal').on('hidden.bs.modal', function () {
+            const submitButton = document.querySelector('#editVisitForm button[type="submit"]');
+            submitButton.innerHTML = 'Update';
+            submitButton.disabled = false;
+        });
+        $('#updateVisitBtn').on('click', function () {
+            const visitId = $('#editSalesVisitId').val();
+
+            const visit = {
+                SalesVisitId: visitId,
+                UserId: $('#editUserDropdown').val(),
+                VisitDate: $('#editVisitDate').val(),
+                VisitTime: $('#editVisitTime').val(),
+                MeetingTypeId: $('#editMeetingTypeDropdown').val(),
+                DiscussionTypeId: $('#editDiscussionTypeDropdown').val(),
+                MeetingVenueName: $('#editVenue').val(),
+                MeetingLatitude: $('#editLatitude').val(),
+                MeetingLongitude: $('#editLongitude').val(),
+                MeetingNotes: $('#editNotes').val(),
+                SalesVisitCode: $('#editCode').val(),
+                AgentId: $('#editAgentDropdown').val()
+            };
+
+            $(this).prop('disabled', true).text('Updating...');
+
+            $.ajax({
+                url: `${apiBase}/SalesVisit/${visitId}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(visit),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert('Server error. Try again.');
+                },
+                complete: function () {
+                    $('#updateVisitBtn').prop('disabled', false).text('Update');
+                }
+            });
+        });
+
+       
+    </script>
+
+    <script>
+        function loadUsers(selectedId = "") {
+            return $.get(`${apiBase}/User`, function (users) {
+                $('#editUserDropdown').empty().append(`<option value="">Select</option>`);
+                $.each(users, function (i, user) {
+                    $('#editUserDropdown').append(`<option value="${user.userId}">${user.firstName} ${user.lastName}</option>`);
+                });
+                $('#editUserDropdown').val(selectedId);
+            });
+        }
+
+        function loadMeetingTypes(selectedId = "") {
+            return $.get(`${apiBase}/MeetingType`, function (types) {
+                $('#editMeetingTypeDropdown').empty().append(`<option value="">Select</option>`);
+                $.each(types, function (i, type) {
+                    $('#editMeetingTypeDropdown').append(`<option value="${type.meetingTypeId}">${type.meetingTypeName}</option>`);
+                });
+                $('#editMeetingTypeDropdown').val(selectedId);
+            });
+        }
+
+        function loadDiscussionTypes(selectedId = "") {
+            return $.get(`${apiBase}/DiscussionType`, function (types) {
+                $('#editDiscussionTypeDropdown').empty().append(`<option value="">Select</option>`);
+                $.each(types, function (i, type) {
+                    $('#editDiscussionTypeDropdown').append(`<option value="${type.discussionTypeId}">${type.discussionTypeName}</option>`);
+                });
+                $('#editDiscussionTypeDropdown').val(selectedId);
+            });
+        }
+
+        function loadAgents(selectedId = "") {
+            return $.get(`${apiBase}/Agent`, function (agents) {
+                $('#editAgentDropdown').empty().append(`<option value="">Select</option>`);
+                $.each(agents, function (i, agent) {
+                    $('#editAgentDropdown').append(`<option value="${agent.agentId}">${agent.agentName}</option>`);
+                });
+                $('#editAgentDropdown').val(selectedId);
+            });
+        }
+
+
+        </script>
+    <script>
+        const apiBase = "https://localhost:7228/api";
+
+        $('#addVisitForm').on('submit', function (e) {
+            debugger;
+            e.preventDefault();
+
+            const visit = {
+                UserId: $('#userDropdown').val(),
+                VisitDate: $('[name="VisitDate"]').val(),
+                VisitTime: $('[name="VisitTime"]').val(),
+                AgentId: $('[name="AgentId"]').val(),
+                MeetingTypeId: $('#meetingDropdown').val(),
+                DiscussionTypeId: $('#discussionDropdown').val(),
+                MeetingVenueName: $('[name="MeetingVenueName"]').val(),
+                MeetingLatitude: $('[name="MeetingLatitude"]').val(),
+                MeetingLongitude: $('[name="MeetingLongitude"]').val(),
+                MeetingNotes: $('[name="MeetingNotes"]').val(),
+                SalesVisitCode: $('[name="SalesVisitCode"]').val()
+            };
+
+            $.ajax({
+                url: `${apiBase}/SalesVisit`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(visit),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert('Error saving Sales Visit');
+                }
+            });
+        });
+
+
+
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+    <script>
+        function loadDropdowns() {
+         
+
+            return new Promise((resolve, reject) => {
+                let completed = 0;
+
+                function checkComplete() {
+                    completed++;
+                    if (completed === 4) resolve();
+                }
+
+                $.get(`${apiBase}/User`, function (users) {
+                    $('#userDropdown, #editUserDropdown').empty().append(`<option value="">Select</option>`);
+                    $.each(users, function (i, user) {
+                        $('#userDropdown, #editUserDropdown').append(`<option value="${user.userId}">${user.firstName} ${user.lastName}</option>`);
+                    });
+                    checkComplete();
+                }).fail(reject);
+
+                $.get(`${apiBase}/MeetingType`, function (types) {
+                    $('#meetingDropdown, #editMeetingTypeDropdown').empty().append(`<option value="">Select</option>`);
+                    $.each(types, function (i, type) {
+                        $('#meetingDropdown, #editMeetingTypeDropdown').append(`<option value="${type.meetingTypeId}">${type.meetingTypeName}</option>`);
+                    });
+                    checkComplete();
+                }).fail(reject);
+
+                $.get(`${apiBase}/DiscussionType`, function (types) {
+                    $('#discussionDropdown, #editDiscussionTypeDropdown').empty().append(`<option value="">Select</option>`);
+                    $.each(types, function (i, type) {
+                        $('#discussionDropdown, #editDiscussionTypeDropdown').append(`<option value="${type.discussionTypeId}">${type.discussionTypeName}</option>`);
+                    });
+                    checkComplete();
+                }).fail(reject);
+
+                $.get(`${apiBase}/Agent`, function (agents) {
+                    $('#agentDropdown, #editAgentDropdown').empty().append(`<option value="">Select</option>`);
+                    $.each(agents, function (i, agent) {
+                        $('#agentDropdown, #editAgentDropdown').append(`<option value="${agent.agentId}">${agent.agentName}</option>`);
+                    });
+                    checkComplete();
+                }).fail(reject);
+            });
+        }
+
+
+        function editVisit(id, btn) {
+            const editButton = btn;
+            const originalText = editButton.innerHTML;
+            editButton.innerHTML = 'Loading...';
+            editButton.disabled = true;
+
+            fetch(`https://localhost:7228/api/SalesVisit/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    Promise.all([
+                        loadUsers(data.userId),
+                        loadMeetingTypes(data.meetingTypeId),
+                        loadDiscussionTypes(data.discussionTypeId),
+                        loadAgents(data.agentId)
+                    ]).then(() => {
+                        $('#editSalesVisitId').val(data.salesVisitId);
+                        $('#editVisitDate').val(data.visitDate ? new Date(data.visitDate).toISOString().split('T')[0] : '');
+                        $('#editVisitTime').val(data.visitTime || '');
+                        $('#editVenue').val(data.meetingVenueName || '');
+                        $('#editLatitude').val(data.meetingLatitude ?? '');
+                        $('#editLongitude').val(data.meetingLongitude ?? '');
+                        $('#editNotes').val(data.meetingNotes || '');
+                        $('#editCode').val(data.salesVisitCode || '');
+
+                        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                        editModal.show();
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error loading visit');
+                })
+                .finally(() => {
+                    editButton.innerHTML = originalText;
+                    editButton.disabled = false;
+                });
+        }
+
+        $('#updateVisitBtn').on('click', function () {
+            const visit = {
+                salesVisitId: $('#editSalesVisitId').val(),
+                userId: $('#editUserDropdown').val(),
+                visitDate: $('#editVisitDate').val(),
+                visitTime: $('#editVisitTime').val(),
+                meetingTypeId: $('#editMeetingTypeDropdown').val(),
+                discussionTypeId: $('#editDiscussionTypeDropdown').val(),
+                meetingVenueName: $('#editVenue').val(),
+                meetingLatitude: $('#editLatitude').val(),
+                meetingLongitude: $('#editLongitude').val(),
+                meetingNotes: $('#editNotes').val(),
+                salesVisitCode: $('#editCode').val(),
+                agentId: $('#editAgentDropdown').val()
+            };
+
+            $(this).prop('disabled', true).text('Updating...');
+
+            $.ajax({
+                url: `https://localhost:7228/api/SalesVisit/${visit.salesVisitId}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(visit),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert('Server error. Try again.');
+                },
+                complete: function () {
+                    $('#updateVisitBtn').prop('disabled', false).text('Update');
+                }
+            });
+        });
+
+
+        function deleteVisit(id) {
+            if (!confirm('Are you sure?')) return;
+
+            $.ajax({
+                url: `${apiBase}/SalesVisit/${id}`,
+                type: 'DELETE',
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert('Error deleting record');
+                }
+            });
+        }
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+          
+
+            // Force re-bind events when document is ready
+            $('#addModal').on('show.bs.modal', function () {
+                loadDropdowns();
+            });
+
+          
+        });
+
+    </script>
+
+</body>
+</html>
