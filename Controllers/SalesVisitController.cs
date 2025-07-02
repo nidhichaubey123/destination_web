@@ -14,16 +14,32 @@ namespace DMCPortal.Web.Controllers
             _httpClient = factory.CreateClient();
             _httpClient.BaseAddress = new Uri("https://localhost:7228/api/");
         }
-
         public async Task<IActionResult> Index()
         {
-            var res = await _httpClient.GetAsync("SalesVisit");
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            Console.WriteLine("UserId from Claims: " + userId);
+
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Index", "Login");
+
+            Console.WriteLine($"Calling API: SalesVisit/UserWise/{userId}");
+
+            var res = await _httpClient.GetAsync($"SalesVisit/UserWise/{userId}");
+            Console.WriteLine("API Status: " + res.StatusCode);
+
             var list = new List<SalesVisit>();
+
             if (res.IsSuccessStatusCode)
             {
                 var data = await res.Content.ReadAsStringAsync();
+                Console.WriteLine("API Data: " + data);
                 list = JsonSerializer.Deserialize<List<SalesVisit>>(data, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
             }
+            else
+            {
+                Console.WriteLine("API call failed with status: " + res.StatusCode);
+            }
+
             return View(list);
         }
 
@@ -42,10 +58,19 @@ namespace DMCPortal.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(SalesVisit visit)
         {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Index", "Login");
+
+            visit.UserId = int.Parse(userId);  // Always set correct UserId before API call
+
             var json = JsonSerializer.Serialize(visit);
             var res = await _httpClient.PostAsync("SalesVisit", new StringContent(json, Encoding.UTF8, "application/json"));
-            return res.IsSuccessStatusCode ? RedirectToAction("Index") : RedirectToAction("Index");
+
+            return RedirectToAction("Index");
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Edit(SalesVisit visit)

@@ -56,7 +56,8 @@ namespace DMCPortal.Web.Controllers
                     new Claim(ClaimTypes.Name, request.EmailAddress),
                     new Claim("SessionId", result.SessionId.ToString()),
                       new Claim("FirstName", result.FirstName ?? ""),
-    new Claim("LastName", result.LastName ?? "")
+    new Claim("LastName", result.LastName ?? ""),
+        new Claim("UserId", result.UserId.ToString())
                 };
 
                 // ✅ Add each operation name as a claim

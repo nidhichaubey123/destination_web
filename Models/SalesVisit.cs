@@ -4,6 +4,8 @@
     {
         public int SalesVisitId { get; set; }
         public int UserId { get; set; }
+        public int UserName { get; set; }
+
         public DateTime VisitDate { get; set; }
         public TimeSpan VisitTime { get; set; }
         public int? AgentId { get; set; }
@@ -18,6 +20,9 @@
         public DateTime CreatedOn { get; set; }
         public DateTime? UpdatedOn { get; set; }
 
-
+        public int? CreatedBy { get; set; }
+        public int? UpdatedBy { get; set; }
+        public DateTime? DeletedOn { get; set; }
+        public int? DeletedBy { get; set; }
     }
 }

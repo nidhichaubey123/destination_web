@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Visit Management</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -33,7 +33,7 @@
                 font-weight: 600;
             }
 
-       
+
 
         .stats-row {
             margin-bottom: 2rem;
@@ -197,6 +197,9 @@
                         <h5 class="modal-title">Add New Sales Visit</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
+
+
+                    <input type="hidden" name="CreatedBy" id="createdByField" />
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">User</label>
@@ -251,7 +254,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Sales Visit Code</label>
-                            <input name="SalesVisitCode" class="form-control" />
+                            <input name="SalesVisitCode" class="form-control" required />
                         </div>
 
                     </div>
@@ -299,37 +302,37 @@
 
                         <div class="mb-3">
                             <label class="form-label">Agent</label>
-                            <select name="AgentId" id="editAgentDropdown" class="form-select"></select>
+                            <select name="AgentId" id="editAgentDropdown" class="form-select" required></select>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Meeting Type</label>
-                            <select name="MeetingTypeId" class="form-select" id="editMeetingTypeDropdown"></select>
+                            <select name="MeetingTypeId" class="form-select" id="editMeetingTypeDropdown" required></select>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Discussion Type</label>
-                            <select name="DiscussionTypeId" class="form-select" id="editDiscussionTypeDropdown"></select>
+                            <select name="DiscussionTypeId" class="form-select" id="editDiscussionTypeDropdown" required></select>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Venue Name</label>
-                            <input name="MeetingVenueName" class="form-control" id="editVenue" />
+                            <input name="MeetingVenueName" class="form-control" id="editVenue" required />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Latitude</label>
-                            <input name="MeetingLatitude" type="number" step="0.000001" class="form-control" id="editLatitude" />
+                            <input name="MeetingLatitude" type="number" step="0.000001" class="form-control" required id="editLatitude" />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Longitude</label>
-                            <input name="MeetingLongitude" type="number" step="0.000001" class="form-control" id="editLongitude" />
+                            <input name="MeetingLongitude" type="number" step="0.000001" class="form-control" required id="editLongitude" />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Meeting Notes</label>
-                            <textarea name="MeetingNotes" class="form-control" id="editNotes" rows="3"></textarea>
+                            <textarea name="MeetingNotes" class="form-control" id="editNotes" rows="3" required></textarea>
                         </div>
 
                         <div class="mb-3">
@@ -352,46 +355,54 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    @{
+        var loggedInUserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value ?? "0";
+        var userOperations = string.Join(",", User.Claims.Where(c => c.Type == "Operation").Select(c => c.Value));
+    }
+
     <script>
-        // Set current datetime when add modal is opened
+
+        const loggedInUserId = '@loggedInUserId';
+        const userOperations = '@userOperations';
+
+    </script>
+    <script>
         $('#addModal').on('show.bs.modal', function () {
-            const now = new Date();
-            const isoString = now.toISOString();
-            document.getElementById('createdOn').value = isoString;
+            $('#createdByField').val(loggedInUserId);
+            loadDropdowns();
         });
+
         function editVisit(id, btn) {
             const editButton = btn;
             const originalText = editButton.innerHTML;
             editButton.innerHTML = 'Loading...';
             editButton.disabled = true;
 
-            fetch(`https://localhost:7228/api/SalesVisit/${id}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    return response.json();
-                })
+            fetch(`${apiBase}/SalesVisit/${id}`)
+                .then(res => res.json())
                 .then(data => {
-                    loadDropdowns(() => {
+                    Promise.all([
+                        loadUsers(data.userId),
+                        loadMeetingTypes(data.meetingTypeId),
+                        loadDiscussionTypes(data.discussionTypeId),
+                        loadAgents(data.agentId)
+                    ]).then(() => {
                         $('#editSalesVisitId').val(data.salesVisitId);
-                        $('#editUserDropdown').val(data.userId);
-                        $('#editVisitDate').val(data.visitDate ? new Date(data.visitDate).toISOString().split('T')[0] : '');
+                        $('#editVisitDate').val(data.visitDate?.split('T')[0] || '');
                         $('#editVisitTime').val(data.visitTime || '');
-                        $('#editAgentDropdown').val(data.agentId || '');
-                        $('#editMeetingTypeDropdown').val(data.meetingTypeId || '');
-                        $('#editDiscussionTypeDropdown').val(data.discussionTypeId || '');
                         $('#editVenue').val(data.meetingVenueName || '');
                         $('#editLatitude').val(data.meetingLatitude ?? '');
                         $('#editLongitude').val(data.meetingLongitude ?? '');
                         $('#editNotes').val(data.meetingNotes || '');
                         $('#editCode').val(data.salesVisitCode || '');
 
-                        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                        const editModal = new bootstrap.Modal('#editModal');
                         editModal.show();
                     });
                 })
                 .catch(err => {
                     console.error(err);
-                    alert('Error loading sales visit data');
+                    alert('Failed to load record');
                 })
                 .finally(() => {
                     editButton.innerHTML = originalText;
@@ -428,7 +439,8 @@
                 MeetingLongitude: $('#editLongitude').val(),
                 MeetingNotes: $('#editNotes').val(),
                 SalesVisitCode: $('#editCode').val(),
-                AgentId: $('#editAgentDropdown').val()
+                AgentId: $('#editAgentDropdown').val(),
+                updatedBy: loggedInUserId
             };
 
             $(this).prop('disabled', true).text('Updating...');
@@ -450,7 +462,7 @@
             });
         });
 
-       
+
     </script>
 
     <script>
@@ -495,27 +507,30 @@
         }
 
 
-        </script>
+    </script>
     <script>
         const apiBase = "https://localhost:7228/api";
 
         $('#addVisitForm').on('submit', function (e) {
-            debugger;
             e.preventDefault();
-
             const visit = {
-                UserId: $('#userDropdown').val(),
+                UserId: parseInt($('#userDropdown').val()),
                 VisitDate: $('[name="VisitDate"]').val(),
                 VisitTime: $('[name="VisitTime"]').val(),
-                AgentId: $('[name="AgentId"]').val(),
-                MeetingTypeId: $('#meetingDropdown').val(),
-                DiscussionTypeId: $('#discussionDropdown').val(),
+                AgentId: parseInt($('[name="AgentId"]').val()),
+                MeetingTypeId: parseInt($('#meetingDropdown').val()),
+                DiscussionTypeId: parseInt($('#discussionDropdown').val()),
                 MeetingVenueName: $('[name="MeetingVenueName"]').val(),
-                MeetingLatitude: $('[name="MeetingLatitude"]').val(),
-                MeetingLongitude: $('[name="MeetingLongitude"]').val(),
+                MeetingLatitude: parseFloat($('[name="MeetingLatitude"]').val()),
+                MeetingLongitude: parseFloat($('[name="MeetingLongitude"]').val()),
                 MeetingNotes: $('[name="MeetingNotes"]').val(),
-                SalesVisitCode: $('[name="SalesVisitCode"]').val()
+                SalesVisitCode: $('[name="SalesVisitCode"]').val(),
+                CreatedBy: parseInt(loggedInUserId)  // Send CreatedBy from client
             };
+
+
+
+            console.log("Data sending to API:", visit);  
 
             $.ajax({
                 url: `${apiBase}/SalesVisit`,
@@ -525,21 +540,18 @@
                 success: function () {
                     location.reload();
                 },
-                error: function () {
-                    alert('Error saving Sales Visit');
+                error: function (xhr) {
+                    console.error("Server Response:", xhr.responseText);
+                    alert(`Error saving Sales Visit:\n${xhr.status} - ${xhr.responseText}`);
                 }
             });
         });
 
-
-
-        </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-
+    </script>
+ 
     <script>
         function loadDropdowns() {
-         
+
 
             return new Promise((resolve, reject) => {
                 let completed = 0;
@@ -635,7 +647,8 @@
                 meetingLongitude: $('#editLongitude').val(),
                 meetingNotes: $('#editNotes').val(),
                 salesVisitCode: $('#editCode').val(),
-                agentId: $('#editAgentDropdown').val()
+                agentId: $('#editAgentDropdown').val(),
+                UpdatedBy: parseInt(loggedInUserId)
             };
 
             $(this).prop('disabled', true).text('Updating...');
@@ -659,7 +672,7 @@
 
 
         function deleteVisit(id) {
-            if (!confirm('Are you sure?')) return;
+            if (!confirm('Are you want to delete this sale?')) return;
 
             $.ajax({
                 url: `${apiBase}/SalesVisit/${id}`,
@@ -677,14 +690,31 @@
 
     <script>
         $(document).ready(function () {
-          
+            $('#createdByField').val(loggedInUserId);
+            const canSeeAll = userOperations.includes('CanSeeOtherUsersRecords');
+            const url = canSeeAll ? `${apiBase}/SalesVisit` : `${apiBase}/SalesVisit/UserWise/${loggedInUserId}`;
 
-            // Force re-bind events when document is ready
-            $('#addModal').on('show.bs.modal', function () {
-                loadDropdowns();
+            $.get(url, function (visits) {
+                let html = "";
+                visits.forEach(v => {
+                    html += `<tr>
+                                <td>${v.salesVisitId}</td>
+                                <td>${v.userId}</td>
+                                <td>${v.visitDate?.split('T')[0]}</td>
+                                <td>${v.visitTime}</td>
+                                <td>${v.meetingVenueName}</td>
+                                <td>${v.meetingNotes}</td>
+                                <td>${v.salesVisitCode}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="editVisit(${v.salesVisitId}, this)">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteVisit(${v.salesVisitId})">Delete</button>
+                                </td>
+                            </tr>`;
+                });
+                $('.table-container tbody').html(html);
             });
 
-          
+            loadDropdowns();  // Load dropdowns for Add form at page load
         });
 
     </script>
