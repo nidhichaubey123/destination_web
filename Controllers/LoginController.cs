@@ -50,14 +50,16 @@ namespace DMCPortal.Web.Controllers
                     ModelState.AddModelError(string.Empty, "Login failed: Invalid server response.");
                     return View(request);
                 }
-
+                var fullName = $"{result.FirstName} {result.LastName}".Trim();
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, request.EmailAddress),
                     new Claim("SessionId", result.SessionId.ToString()),
                       new Claim("FirstName", result.FirstName ?? ""),
+
     new Claim("LastName", result.LastName ?? ""),
-        new Claim("UserId", result.UserId.ToString())
+        new Claim("UserId", result.UserId.ToString()),
+            new Claim("FullName", fullName)
                 };
 
                 // ✅ Add each operation name as a claim

@@ -14,6 +14,9 @@
         public string MeetingVenueName { get; set; }
         public decimal? MeetingLatitude { get; set; }
         public decimal? MeetingLongitude { get; set; }
+
+        public decimal? EntryLatitude { get; set; }
+        public decimal? EntryLongitude { get; set; }
         public string MeetingNotes { get; set; }
         public string SalesVisitCode { get; set; }
 
@@ -24,5 +27,8 @@
         public int? UpdatedBy { get; set; }
         public DateTime? DeletedOn { get; set; }
         public int? DeletedBy { get; set; }
+
+
+
     }
 }

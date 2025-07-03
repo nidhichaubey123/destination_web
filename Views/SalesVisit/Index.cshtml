@@ -3,6 +3,12 @@
 }
 @model List<DMCPortal.Web.Models.SalesVisit>
 
+@{
+    var loggedInUserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value ?? "0";
+    var loggedInUserName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? "N/A";
+    var userOperations = string.Join(",", User.Claims.Where(c => c.Type == "Operation").Select(c => c.Value));
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,7 +115,13 @@
             font-weight: 500;
             color: #495057;
         }
+
+        .modal-xl-custom {
+            max-width: 900px;
+        }
     </style>
+
+
 </head>
 <body>
     <div class="container-fluid mt-4">
@@ -187,9 +199,8 @@
     </div>
 
     <!-- Add Modal -->
-    <!-- Add Modal -->
     <div class="modal fade" id="addModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-xl-custom">
             <div class="modal-content">
                 <form id="addVisitForm">
                     @Html.AntiForgeryToken()
@@ -198,66 +209,71 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
-
                     <input type="hidden" name="CreatedBy" id="createdByField" />
+                    <input type="hidden" name="EntryLatitude" id="entryLat" />
+                    <input type="hidden" name="EntryLongitude" id="entryLng" />
+
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">User</label>
-                            <select name="UserId" id="userDropdown" class="form-select" required></select>
+                        <div class="row g-3">
+                            <div class="col-md-6" >
+                                <label class="form-label" >User</label>
+                                <input type="text" class="form-control"  readonly value="@loggedInUserName" />
+                                <input type="hidden" name="UserId" id="userDropdown" value="@loggedInUserId" />
+                            </div>
+
+
+                            <div class="col-md-3">
+                                <label class="form-label">Visit Date</label>
+                                <input name="VisitDate" type="date" class="form-control" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Visit Time</label>
+                                <input name="VisitTime" type="time" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Agent</label>
+                                <select name="AgentId" id="agentDropdown" class="form-select" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Discussion Type</label>
+                                <select name="DiscussionTypeId" id="discussionDropdown" class="form-select" required></select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Meeting Type</label>
+                                <select name="MeetingTypeId" id="meetingDropdown" class="form-select" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Venue Name</label>
+                                <input name="MeetingVenueName" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Latitude</label>
+                                <input name="MeetingLatitude" type="number" step="0.000001" class="form-control" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Longitude</label>
+                                <input name="MeetingLongitude" type="number" step="0.000001" class="form-control" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Pick Location on Map</label>
+                                <div id="map" style="height: 250px; border: 1px solid #ced4da;"></div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Meeting Notes</label>
+                                <textarea name="MeetingNotes" class="form-control" rows="3" required></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Sales Visit Code</label>
+                                <input name="SalesVisitCode" class="form-control" required />
+                            </div>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Visit Date</label>
-                            <input name="VisitDate" type="date" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Visit Time</label>
-                            <input name="VisitTime" type="time" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Agent</label>
-                            <select name="AgentId" id="agentDropdown" class="form-select" required></select>
-                        </div>
-
-
-                        <div class="mb-3">
-                            <label class="form-label">Discussion Type</label>
-                            <select name="DiscussionTypeId" id="discussionDropdown" class="form-select" required></select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Meeting Type</label>
-                            <select name="MeetingTypeId" id="meetingDropdown" class="form-select" required></select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Venue Name</label>
-                            <input name="MeetingVenueName" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Latitude</label>
-                            <input name="MeetingLatitude" type="number" step="0.000001" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Longitude</label>
-                            <input name="MeetingLongitude" type="number" step="0.000001" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Meeting Notes</label>
-                            <textarea name="MeetingNotes" class="form-control" required></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Sales Visit Code</label>
-                            <input name="SalesVisitCode" class="form-control" required />
-                        </div>
-
                     </div>
+
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-success">Save</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -270,76 +286,78 @@
 
 
     <!-- Edit Modal -->
+
     <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-xl-custom">
             <div class="modal-content">
                 <form id="editVisitForm" method="post" action="@Url.Action("Edit","SalesVisit")">
                     @Html.AntiForgeryToken()
                     <input name="SalesVisitId" type="hidden" id="editSalesVisitId" />
 
-                    <div class="modal-header">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">Edit Sales Visit</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
                     <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">User</label>
+                                <input type="text" class="form-control" readonly id="editUserName" />
+                                <input type="hidden" name="UserId" id="editUserDropdown" />
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">User</label>
-                            <select name="UserId" class="form-select" id="editUserDropdown" required></select>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col">
+                            <div class="col-md-3">
                                 <label class="form-label">Visit Date</label>
                                 <input name="VisitDate" type="date" class="form-control" id="editVisitDate" required />
                             </div>
-                            <div class="col">
+                            <div class="col-md-3">
                                 <label class="form-label">Visit Time</label>
                                 <input name="VisitTime" type="time" class="form-control" id="editVisitTime" required />
                             </div>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Agent</label>
-                            <select name="AgentId" id="editAgentDropdown" class="form-select" required></select>
-                        </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Agent</label>
+                                <select name="AgentId" id="editAgentDropdown" class="form-select" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Meeting Type</label>
+                                <select name="MeetingTypeId" class="form-select" id="editMeetingTypeDropdown" required></select>
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Meeting Type</label>
-                            <select name="MeetingTypeId" class="form-select" id="editMeetingTypeDropdown" required></select>
-                        </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Discussion Type</label>
+                                <select name="DiscussionTypeId" class="form-select" id="editDiscussionTypeDropdown" required></select>
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Discussion Type</label>
-                            <select name="DiscussionTypeId" class="form-select" id="editDiscussionTypeDropdown" required></select>
-                        </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Venue Name</label>
+                                <input name="MeetingVenueName" class="form-control" id="editVenue" required />
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Venue Name</label>
-                            <input name="MeetingVenueName" class="form-control" id="editVenue" required />
-                        </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Latitude</label>
+                                <input name="MeetingLatitude" type="number" step="0.000001" class="form-control" required id="editLatitude" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Longitude</label>
+                                <input name="MeetingLongitude" type="number" step="0.000001" class="form-control" required id="editLongitude" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Pick Location on Map</label>
+                                <div id="editMap" style="height: 250px; border: 1px solid #ced4da;"></div>
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Latitude</label>
-                            <input name="MeetingLatitude" type="number" step="0.000001" class="form-control" required id="editLatitude" />
-                        </div>
+                            <div class="col-12">
+                                <label class="form-label">Meeting Notes</label>
+                                <textarea name="MeetingNotes" class="form-control" id="editNotes" rows="3" required></textarea>
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Longitude</label>
-                            <input name="MeetingLongitude" type="number" step="0.000001" class="form-control" required id="editLongitude" />
+                            <div class="col-md-6">
+                                <label class="form-label">Sales Visit Code</label>
+                                <input name="SalesVisitCode" class="form-control" id="editCode" />
+                            </div>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Meeting Notes</label>
-                            <textarea name="MeetingNotes" class="form-control" id="editNotes" rows="3" required></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Sales Visit Code</label>
-                            <input name="SalesVisitCode" class="form-control" id="editCode" />
-                        </div>
-
                     </div>
 
                     <div class="modal-footer">
@@ -351,14 +369,10 @@
         </div>
     </div>
 
-
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    @{
-        var loggedInUserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value ?? "0";
-        var userOperations = string.Join(",", User.Claims.Where(c => c.Type == "Operation").Select(c => c.Value));
-    }
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfOLIUYqYgg76KY-NlqaXPPFb-5RlkSFc&callback=initMap" async defer></script>
+
 
     <script>
 
@@ -367,10 +381,22 @@
 
     </script>
     <script>
-        $('#addModal').on('show.bs.modal', function () {
-            $('#createdByField').val(loggedInUserId);
-            loadDropdowns();
+        $('#addModal').on('shown.bs.modal', function () {
+              if (typeof google !== 'undefined' && map) {
+            google.maps.event.trigger(map, 'resize');
+            map.setCenter(marker.getPosition());
+        }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        $('#entryLat').val(pos.coords.latitude.toFixed(6));
+                        $('#entryLng').val(pos.coords.longitude.toFixed(6));
+                    }
+                );
+            }
         });
+
 
         function editVisit(id, btn) {
             const editButton = btn;
@@ -378,31 +404,46 @@
             editButton.innerHTML = 'Loading...';
             editButton.disabled = true;
 
-            fetch(`${apiBase}/SalesVisit/${id}`)
-                .then(res => res.json())
+            fetch(`https://localhost:7228/api/SalesVisit/${id}`)
+                .then(response => response.json())
                 .then(data => {
                     Promise.all([
-                        loadUsers(data.userId),
                         loadMeetingTypes(data.meetingTypeId),
                         loadDiscussionTypes(data.discussionTypeId),
                         loadAgents(data.agentId)
                     ]).then(() => {
+
                         $('#editSalesVisitId').val(data.salesVisitId);
-                        $('#editVisitDate').val(data.visitDate?.split('T')[0] || '');
+                        $('#editVisitDate').val(data.visitDate ? new Date(data.visitDate).toISOString().split('T')[0] : '');
                         $('#editVisitTime').val(data.visitTime || '');
                         $('#editVenue').val(data.meetingVenueName || '');
                         $('#editLatitude').val(data.meetingLatitude ?? '');
                         $('#editLongitude').val(data.meetingLongitude ?? '');
                         $('#editNotes').val(data.meetingNotes || '');
                         $('#editCode').val(data.salesVisitCode || '');
+                        $('#editLatitude').val(data.meetingLatitude ?? '');
+                        $('#editLongitude').val(data.meetingLongitude ?? '');
 
-                        const editModal = new bootstrap.Modal('#editModal');
+                        $('#editUserName').val('@loggedInUserName');
+                        $('#editUserDropdown').val('@loggedInUserId');
+
+                        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
                         editModal.show();
+
+                        setTimeout(() => {
+                            const lat = data.meetingLatitude || 19.0760;
+                            const lng = data.meetingLongitude || 72.8777;
+                            initEditMap(lat, lng);
+
+                            google.maps.event.trigger(editMap, 'resize');
+                        }, 500);
+
+
                     });
                 })
                 .catch(err => {
                     console.error(err);
-                    alert('Failed to load record');
+                    alert('Error loading visit');
                 })
                 .finally(() => {
                     editButton.innerHTML = originalText;
@@ -425,36 +466,34 @@
             submitButton.disabled = false;
         });
         $('#updateVisitBtn').on('click', function () {
-            const visitId = $('#editSalesVisitId').val();
-
             const visit = {
-                SalesVisitId: visitId,
-                UserId: $('#editUserDropdown').val(),
-                VisitDate: $('#editVisitDate').val(),
-                VisitTime: $('#editVisitTime').val(),
-                MeetingTypeId: $('#editMeetingTypeDropdown').val(),
-                DiscussionTypeId: $('#editDiscussionTypeDropdown').val(),
-                MeetingVenueName: $('#editVenue').val(),
-                MeetingLatitude: $('#editLatitude').val(),
-                MeetingLongitude: $('#editLongitude').val(),
-                MeetingNotes: $('#editNotes').val(),
-                SalesVisitCode: $('#editCode').val(),
-                AgentId: $('#editAgentDropdown').val(),
-                updatedBy: loggedInUserId
+                salesVisitId: $('#editSalesVisitId').val(),
+                userId: $('#editUserDropdown').val(), // Now this will have logged-in user's ID
+                visitDate: $('#editVisitDate').val(),
+                visitTime: $('#editVisitTime').val(),
+                meetingTypeId: $('#editMeetingTypeDropdown').val(),
+                discussionTypeId: $('#editDiscussionTypeDropdown').val(),
+                meetingVenueName: $('#editVenue').val(),
+                meetingLatitude: $('#editLatitude').val(),
+                meetingLongitude: $('#editLongitude').val(),
+                meetingNotes: $('#editNotes').val(),
+                salesVisitCode: $('#editCode').val(),
+                agentId: $('#editAgentDropdown').val(),
+                UpdatedBy: parseInt(loggedInUserId)
             };
 
             $(this).prop('disabled', true).text('Updating...');
 
             $.ajax({
-                url: `${apiBase}/SalesVisit/${visitId}`,
+                url: `https://localhost:7228/api/SalesVisit/${visit.salesVisitId}`,
                 type: 'PUT',
                 contentType: 'application/json',
                 data: JSON.stringify(visit),
                 success: function () {
                     location.reload();
                 },
-                error: function () {
-                    alert('Server error. Try again.');
+                error: function (xhr) {
+                    alert('Error updating record: ' + xhr.responseText);
                 },
                 complete: function () {
                     $('#updateVisitBtn').prop('disabled', false).text('Update');
@@ -466,15 +505,7 @@
     </script>
 
     <script>
-        function loadUsers(selectedId = "") {
-            return $.get(`${apiBase}/User`, function (users) {
-                $('#editUserDropdown').empty().append(`<option value="">Select</option>`);
-                $.each(users, function (i, user) {
-                    $('#editUserDropdown').append(`<option value="${user.userId}">${user.firstName} ${user.lastName}</option>`);
-                });
-                $('#editUserDropdown').val(selectedId);
-            });
-        }
+       
 
         function loadMeetingTypes(selectedId = "") {
             return $.get(`${apiBase}/MeetingType`, function (types) {
@@ -523,9 +554,11 @@
                 MeetingVenueName: $('[name="MeetingVenueName"]').val(),
                 MeetingLatitude: parseFloat($('[name="MeetingLatitude"]').val()),
                 MeetingLongitude: parseFloat($('[name="MeetingLongitude"]').val()),
+                EntryLatitude: parseFloat($('#entryLat').val()),    // Add this
+                EntryLongitude: parseFloat($('#entryLng').val()),
                 MeetingNotes: $('[name="MeetingNotes"]').val(),
                 SalesVisitCode: $('[name="SalesVisitCode"]').val(),
-                CreatedBy: parseInt(loggedInUserId)  // Send CreatedBy from client
+                CreatedBy: parseInt(loggedInUserId)  
             };
 
 
@@ -562,9 +595,9 @@
                 }
 
                 $.get(`${apiBase}/User`, function (users) {
-                    $('#userDropdown, #editUserDropdown').empty().append(`<option value="">Select</option>`);
+                    $('#editUserDropdown').empty();
                     $.each(users, function (i, user) {
-                        $('#userDropdown, #editUserDropdown').append(`<option value="${user.userId}">${user.firstName} ${user.lastName}</option>`);
+                        $('#editUserDropdown').append(`<option value="${user.userId}">${user.firstName} ${user.lastName}</option>`);
                     });
                     checkComplete();
                 }).fail(reject);
@@ -596,48 +629,20 @@
         }
 
 
-        function editVisit(id, btn) {
-            const editButton = btn;
-            const originalText = editButton.innerHTML;
-            editButton.innerHTML = 'Loading...';
-            editButton.disabled = true;
+        $('#editModal').on('shown.bs.modal', function () {
+          if (editMap) {
+             google.maps.event.trigger(editMap, 'resize');
+          }
+      });
 
-            fetch(`https://localhost:7228/api/SalesVisit/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    Promise.all([
-                        loadUsers(data.userId),
-                        loadMeetingTypes(data.meetingTypeId),
-                        loadDiscussionTypes(data.discussionTypeId),
-                        loadAgents(data.agentId)
-                    ]).then(() => {
-                        $('#editSalesVisitId').val(data.salesVisitId);
-                        $('#editVisitDate').val(data.visitDate ? new Date(data.visitDate).toISOString().split('T')[0] : '');
-                        $('#editVisitTime').val(data.visitTime || '');
-                        $('#editVenue').val(data.meetingVenueName || '');
-                        $('#editLatitude').val(data.meetingLatitude ?? '');
-                        $('#editLongitude').val(data.meetingLongitude ?? '');
-                        $('#editNotes').val(data.meetingNotes || '');
-                        $('#editCode').val(data.salesVisitCode || '');
 
-                        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
-                        editModal.show();
-                    });
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Error loading visit');
-                })
-                .finally(() => {
-                    editButton.innerHTML = originalText;
-                    editButton.disabled = false;
-                });
-        }
+     
 
         $('#updateVisitBtn').on('click', function () {
             const visit = {
                 salesVisitId: $('#editSalesVisitId').val(),
-                userId: $('#editUserDropdown').val(),
+                userId: parseInt($('#editUserDropdown').val()),
+
                 visitDate: $('#editVisitDate').val(),
                 visitTime: $('#editVisitTime').val(),
                 meetingTypeId: $('#editMeetingTypeDropdown').val(),
@@ -719,5 +724,118 @@
 
     </script>
 
+    <script>
+        let map;
+        let marker;
+        window.initMap = function () {
+            const defaultCoords = { lat: 19.0760, lng: 72.8777 }; // Mumbai as default
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: defaultCoords,
+                zoom: 15,
+            });
+
+            marker = new google.maps.Marker({
+                position: defaultCoords,
+                map: map,
+                draggable: false
+            });
+
+            if (navigator.geolocation) {
+                
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const userCoords = {
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude
+                        };
+
+
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+
+                        $('#entryLat').val(lat.toFixed(6));
+                        $('#entryLng').val(lng.toFixed(6));
+
+                        map.setCenter(userCoords);
+                        marker.setPosition(userCoords);
+                        $('[name="MeetingLatitude"]').val(userCoords.lat.toFixed(6));
+                        $('[name="MeetingLongitude"]').val(userCoords.lng.toFixed(6));
+                    },
+                    (error) => {
+                        console.warn("Geolocation permission denied or unavailable", error);
+                        $('[name="MeetingLatitude"]').val(defaultCoords.lat);
+                        $('[name="MeetingLongitude"]').val(defaultCoords.lng);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by this browser.");
+                $('[name="MeetingLatitude"]').val(defaultCoords.lat);
+                $('[name="MeetingLongitude"]').val(defaultCoords.lng);
+            }
+
+            // Map click to update location manually
+            map.addListener("click", (e) => {
+                const clickedCoords = {
+                    lat: e.latLng.lat(),
+                    lng: e.latLng.lng()
+                };
+                marker.setPosition(clickedCoords);
+                $('[name="MeetingLatitude"]').val(clickedCoords.lat.toFixed(6));
+                $('[name="MeetingLongitude"]').val(clickedCoords.lng.toFixed(6));
+            });
+
+            // Manual input changes marker position
+            $('[name="MeetingLatitude"], [name="MeetingLongitude"]').on('input', function () {
+                const lat = parseFloat($('[name="MeetingLatitude"]').val());
+                const lng = parseFloat($('[name="MeetingLongitude"]').val());
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const newCoords = { lat: lat, lng: lng };
+                    map.setCenter(newCoords);
+                    marker.setPosition(newCoords);
+                }
+            });
+        };
+
+
+
+
+
+    </script>
+    <script>
+        let editMap;
+    let editMarker;
+
+function initEditMap(lat = 19.0760, lng = 72.8777) {
+    const coords = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+    editMap = new google.maps.Map(document.getElementById("editMap"), {
+        center: coords,
+        zoom: 15,
+    });
+
+    editMarker = new google.maps.Marker({
+        position: coords,
+        map: editMap,
+        draggable: false
+    });
+
+    editMap.addListener("click", (e) => {
+        const clickedCoords = {
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng()
+        };
+        editMarker.setPosition(clickedCoords);
+        $('#editLatitude').val(clickedCoords.lat.toFixed(6));
+        $('#editLongitude').val(clickedCoords.lng.toFixed(6));
+    });
+}
+
+    </script>
 </body>
 </html>

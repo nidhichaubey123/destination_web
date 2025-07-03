@@ -2,23 +2,21 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
     ViewBag.PageTitle = "Meeting Type Master";
 }
-<div id="alertPlaceholder"></div>
-
-
 <!DOCTYPE html>
-<html lang="en">
+
+
 <head>
     <meta charset="UTF-8">
     <title>DMC Portal - User Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
- 
+
     <style>
         body {
             background-color: #f8f9fa;
         }
 
-      
+
         .header-left h5 {
             margin: 0;
             color: #0d6efd;
@@ -27,6 +25,14 @@
         .header-left p {
             margin: 0;
             font-size: 14px;
+        }
+
+        .modal-title {
+            color: white;
+        }
+
+        .modal-header {
+            background-color: #0d6efd;
         }
 
         .header-right {
@@ -45,6 +51,7 @@
             display: flex;
             height: calc(100vh - 60px);
         }
+
 
 
         .content-area {
@@ -182,7 +189,7 @@
         }
 
             button.btn.btn-outline-success.btn-sm.assign-role-btn:hover {
-            background-color: #28a745;
+                background-color: #28a745;
                 color: #fff;
             }
 
@@ -262,6 +269,7 @@
             border-radius: 8px;
             padding: 15px 20px;
         }
+
     </style>
 </head>
 <body>
@@ -275,9 +283,7 @@
     }
 
 
-
     <div class="main-container">
-  
 
 
         <!-- Main Content -->
@@ -300,8 +306,7 @@
             <div class="row text-center mb-4">
                 <div class="col">
                     <div class="card-counter">
-                        <h4 style="color:blue;"><b id="totalUsersCount">0</b></h4>
-
+                        <h4 style="color:blue;"><b>12</b></h4>
                         <p>Total Users</p>
                     </div>
                 </div>
@@ -383,7 +388,7 @@
             </div>
         </div>
     </div>
-  
+
     <!-- Add Edit User Modal -->
     <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -492,61 +497,61 @@
         });
 
         // Save edited user
-     $("#editUserForm").submit(function (e) {
-       e.preventDefault();
-    
-        const sessionId = sessionStorage.getItem("sessionId");
-       const id = $("#editUserId").val();
-      const firstName = $("#editFirstName").val().trim();
+        $("#editUserForm").submit(function (e) {
+            e.preventDefault();
+
+            const sessionId = sessionStorage.getItem("sessionId");
+            const id = $("#editUserId").val();
+            const firstName = $("#editFirstName").val().trim();
             const middleName = $("#editMiddleName").val().trim();
-    const lastName = $("#editLastName").val().trim();
-    const email = $("#editEmailAddress").val().trim();
-    const mobile = $("#editMobileNo").val().trim();
+            const lastName = $("#editLastName").val().trim();
+            const email = $("#editEmailAddress").val().trim();
+            const mobile = $("#editMobileNo").val().trim();
 
-    // Validation
-    if (!firstName || !lastName || !email) {
-        alert("First name, last name, and email are required.");
-        return;
-    }
-
-    
-
-    if (mobile && !/^\d{10}$/.test(mobile)) {
-        alert("Mobile number must be exactly 10 digits if provided.");
-        return;
-    }
-
-    const data = {
-        userId: id,
-        firstName,
-        lastName,
-        emailAddress: email,
-        mobileNo: mobile,
-        middleName: $("#editMiddleName").val().trim()
-    };
-
-    // Submit AJAX PUT
-    $.ajax({
-        url: `${apiBaseUrl}/api/User/${id}`, // Ensure your controller allows this
-        method: "PUT",
-        contentType: "application/json",
-        data: JSON.stringify(data),
-        success: function (res) {
-            const modal = bootstrap.Modal.getInstance(document.getElementById("editUserModal"));
-            modal.hide();
-            $('#successMessage').text(res.message || 'User updated successfully').removeClass("d-none");
-            setTimeout(() => location.reload(), 1000);
-        },
-        error: function (xhr) {
-            const errorResponse = xhr.responseJSON;
-            if (errorResponse?.errors?.emailAddress) {
-                alert("Email already exists.");
-            } else {
-                alert("Failed to update user: " + xhr.responseText);
+            // Validation
+            if (!firstName || !lastName || !email) {
+                alert("First name, last name, and email are required.");
+                return;
             }
-        }
-    });
-});
+
+
+
+            if (mobile && !/^\d{10}$/.test(mobile)) {
+                alert("Mobile number must be exactly 10 digits if provided.");
+                return;
+            }
+
+            const data = {
+                userId: id,
+                firstName,
+                lastName,
+                emailAddress: email,
+                mobileNo: mobile,
+                middleName: $("#editMiddleName").val().trim()
+            };
+
+            // Submit AJAX PUT
+            $.ajax({
+                url: `${apiBaseUrl}/api/User/${id}`, // Ensure your controller allows this
+                method: "PUT",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (res) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById("editUserModal"));
+                    modal.hide();
+                    $('#successMessage').text(res.message || 'User updated successfully').removeClass("d-none");
+                    setTimeout(() => location.reload(), 1000);
+                },
+                error: function (xhr) {
+                    const errorResponse = xhr.responseJSON;
+                    if (errorResponse?.errors?.emailAddress) {
+                        alert("Email already exists.");
+                    } else {
+                        alert("Failed to update user: " + xhr.responseText);
+                    }
+                }
+            });
+        });
 
     </script>
 
@@ -597,55 +602,55 @@
                         ).join('');
 
                         html += `
-                        <div class="user-card">
-                            <div class="user-info-section">
-                                <div class="user-initial">${initials.toUpperCase()}</div>
-                                <div class="user-details">
-                                    <div class="user-name-text">${user.firstName} ${user.lastName}</div>
-                                    <div class="user-email">${user.emailAddress}</div>
-                                </div>
-                            </div>
-                            <div class="user-metadata">
-                                <div class="metadata-group">
-                                    <div class="metadata-label">Role:</div>
-                                    <div class="metadata-value" id="roleColumn-${user.userId}">
-                                        ${rolesHtml || '<span class="text-muted">No roles</span>'}
-                                    </div>
-                                </div>
-                                <div class="metadata-group">
-                                    <div class="metadata-label">Mobile No:</div>
-                                    <div class="metadata-value">${user.mobileNo ?? '-'}</div>
-                                </div>
-                                <div class="metadata-group">
-                                    <div class="metadata-label">Last Login:</div>
-                                    <div class="metadata-value">${user.lastLoggedOn?.substring(0, 10) ?? '-'}</div>
-                                </div>
-                                <div class="metadata-group">
-                                    <div class="metadata-label">Status:</div>
-                                    <div class="metadata-value">
-                                        <span class="status-badge ${user.userIsActive ? 'status-active' : 'status-inactive'}">
-                                        ${user.userIsActive ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="user-actions">
-                                <button class="btn btn-outline-success btn-sm assign-role-btn" data-userid="${user.userId}" data-bs-toggle="modal" data-bs-target="#assignRoleModal">
-                                    Assign Role
-                                </button>
-                                ${hasEditPermission ? `<button class="btn btn-edit" data-userid="${user.userId}">Edit</button>` : ''}
-                                ${hasDeletePermission ? `<button class="btn btn-delete btn-delete-user" data-userid="${user.userId}">Delete</button>` : ''}
-                                <button class="btn ${user.userIsActive ? 'btn-deactivate' : 'btn-activate'} toggle-status-btn" data-userid="${user.userId}" data-currentstatus="${user.userIsActive}">
-                                    ${user.userIsActive ? 'Deactivate' : 'Activate'}
-                                </button>
-                            </div>
-                        </div>`;
+                                        <div class="user-card">
+                                            <div class="user-info-section">
+                                                <div class="user-initial">${initials.toUpperCase()}</div>
+                                                <div class="user-details">
+                                                    <div class="user-name-text">${user.firstName} ${user.lastName}</div>
+                                                    <div class="user-email">${user.emailAddress}</div>
+                                                </div>
+                                            </div>
+                                            <div class="user-metadata">
+                                                <div class="metadata-group">
+                                                    <div class="metadata-label">Role:</div>
+                                                    <div class="metadata-value" id="roleColumn-${user.userId}">
+                                                        ${rolesHtml || '<span class="text-muted">No roles</span>'}
+                                                    </div>
+                                                </div>
+                                                <div class="metadata-group">
+                                                    <div class="metadata-label">Mobile No:</div>
+                                                    <div class="metadata-value">${user.mobileNo ?? '-'}</div>
+                                                </div>
+                                                <div class="metadata-group">
+                                                    <div class="metadata-label">Last Login:</div>
+                                                    <div class="metadata-value">${user.lastLoggedOn?.substring(0, 10) ?? '-'}</div>
+                                                </div>
+                                                <div class="metadata-group">
+                                                    <div class="metadata-label">Status:</div>
+                                                    <div class="metadata-value">
+                                                        <span class="status-badge ${user.userIsActive ? 'status-active' : 'status-inactive'}">
+                                                        ${user.userIsActive ? 'Active' : 'Inactive'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="user-actions">
+                                                <button class="btn btn-outline-success btn-sm assign-role-btn" data-userid="${user.userId}" data-bs-toggle="modal" data-bs-target="#assignRoleModal">
+                                                    Assign Role
+                                                </button>
+                                                ${hasEditPermission ? `<button class="btn btn-edit" data-userid="${user.userId}">Edit</button>` : ''}
+                                                ${hasDeletePermission ? `<button class="btn btn-delete btn-delete-user" data-userid="${user.userId}">Delete</button>` : ''}
+                                                <button class="btn ${user.userIsActive ? 'btn-deactivate' : 'btn-activate'} toggle-status-btn" data-userid="${user.userId}" data-currentstatus="${user.userIsActive}">
+                                                    ${user.userIsActive ? 'Deactivate' : 'Activate'}
+                                                </button>
+                                            </div>
+                                        </div>`;
                     });
 
                     let pagination = `<nav><ul class="pagination justify-content-center mt-3">`;
                     for (let i = 1; i <= totalPages; i++) {
                         pagination += `<li class="page-item ${i === page ? 'active' : ''}">
-                            <a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+                                            <a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
                     }
                     pagination += `</ul></nav>`;
 
@@ -755,12 +760,12 @@
                         roles.forEach(role => {
                             const isChecked = assignedIds.includes(role.roleId) ? "checked" : "";
                             html += `
-                                    <div class="form-check d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <input class="form-check-input role-checkbox" type="checkbox" value="${role.roleId}" id="role-${role.roleId}" ${isChecked}>
-                                            <label class="form-check-label" for="role-${role.roleId}">${role.roleName}</label>
-                                        </div>
-                                    </div>`;
+                                                    <div class="form-check d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <input class="form-check-input role-checkbox" type="checkbox" value="${role.roleId}" id="role-${role.roleId}" ${isChecked}>
+                                                            <label class="form-check-label" for="role-${role.roleId}">${role.roleName}</label>
+                                                        </div>
+                                                    </div>`;
                         });
 
                         $("#roleCheckboxList").html(html);
@@ -830,21 +835,21 @@
     </script>
 
     <script>
-                $('#SearchInput').on('keyup', function () {
+        $('#SearchInput').on('keyup', function () {
             const searchTerm = $(this).val();
             loadUsers(1, 10, searchTerm);
         });
-</script>
+    </script>
 
     <!--Logout click-->
- <script>
+    <script>
         $(document).on("click", "#logoutBtn", function () {
             sessionStorage.clear();
             localStorage.clear();
             window.location.href = "/Login/Logout";
         });
 
- </script>
+    </script>
 
 
 </body>
