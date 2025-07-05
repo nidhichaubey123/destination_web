@@ -1,0 +1,177 @@
+﻿@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+
+}
+
+@model List<DMCPortal.Web.Models.Zone>
+@{
+    ViewBag.Title = "Zone Master";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+
+<a href="@Url.Action("Index", "Master")" class="btn btn-primary" style="border-radius: 8px; padding: 8px 16px;">
+    <i class="fas fa-arrow-left" style="margin-right: 6px;"></i> Back
+</a>
+
+
+<br />
+<br />
+
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between mb-4">
+        <h3>Zone Master</h3>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="bi bi-plus-circle"></i> Add Zone
+        </button>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Zone Name</th>
+                <th>Created By</th>
+                <th>Created On</th>
+                <th>Updated By</th>
+                <th>Updated On</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var zone in Model)
+            {
+                <tr>
+                    <td>@zone.ZoneName</td>
+                    <td>@zone.ZoneCreatedBy</td>
+                    <td>@zone.ZoneCreatedOn.ToString("dd-MM-yyyy")</td>
+                    <td>@zone.ZoneUpdatedBy</td>
+                    <td>@(zone.ZoneUpdatedOn?.ToString("dd-MM-yyyy") ?? "-")</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal"
+                                data-id="@zone.ZoneId" data-name="@zone.ZoneName">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                data-id="@zone.ZoneId" data-name="@zone.ZoneName">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/Zone/Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5>Add Zone</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input name="ZoneName" class="form-control" placeholder="Zone Name" required />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal - FIXED -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Fixed: Added proper action attribute -->
+            <form method="post" id="editForm" action="/Zone/Edit/0">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5>Edit Zone</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="ZoneId" id="editZoneId">
+                    <input class="form-control" name="ZoneName" id="editZoneName" required>
+                    <!-- Fixed: Use correct property name that matches your model -->
+                    <input type="hidden" name="UpdatedBy" value="@(User.Identity?.Name ?? "Admin")">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="submit">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="/Zone/DeleteConfirmed">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5>Delete Zone</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="deleteZoneId" />
+                    Are you sure you want to delete <b id="deleteZoneName"></b>?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const editModalEl = document.getElementById('editModal');
+        if (editModalEl) {
+            editModalEl.addEventListener('show.bs.modal', function (e) {
+                const btn = e.relatedTarget;
+                const zoneId = btn.getAttribute('data-id');
+                const zoneName = btn.getAttribute('data-name');
+
+                // Set form values
+                document.getElementById('editZoneId').value = zoneId;
+                document.getElementById('editZoneName').value = zoneName;
+
+                // Fixed: Update the form action with correct route
+                document.getElementById('editForm').action = `/Zone/Edit/${zoneId}`;
+
+                // Debug: Log to console to verify values
+                console.log('Edit modal opened for Zone ID:', zoneId, 'Zone Name:', zoneName);
+            });
+        }
+
+        const deleteModalEl = document.getElementById('deleteModal');
+        if (deleteModalEl) {
+            deleteModalEl.addEventListener('show.bs.modal', function (e) {
+                const btn = e.relatedTarget;
+                document.getElementById('deleteZoneId').value = btn.getAttribute('data-id');
+                document.getElementById('deleteZoneName').textContent = btn.getAttribute('data-name');
+            });
+        }
+    });
+</script>

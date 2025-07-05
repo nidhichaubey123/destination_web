@@ -1,0 +1,264 @@
+﻿@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    ViewBag.PageTitle = " Master Page";
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+<style>
+
+    .zone-master-link {
+        display: flex;
+        width: 30% !important;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        text-decoration: none;
+        color: #333;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: 2px solid #e9ecef;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    
+    }
+
+    .zone-master-link:hover {
+        color: #0d6efd;
+        background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+        border-color: #0d6efd;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(13, 110, 253, 0.2);
+        text-decoration: none;
+    }
+
+    .zone-master-link:hover::before {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .zone-master-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, #0d6efd 0%, #1e3a8a 100%);
+        opacity: 0;
+        transform: translateX(-100%);
+        transition: all 0.3s ease;
+    }
+
+    .zone-icon-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #0d6efd 0%, #1e3a8a 100%);
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .zone-icon-container::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(135deg, #0d6efd 0%, #1e3a8a 100%);
+        border-radius: 17px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+
+    .zone-master-link:hover .zone-icon-container {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+    }
+
+    .zone-master-link:hover .zone-icon-container::before {
+        opacity: 1;
+    }
+
+    .zone-master-icon {
+        font-size: 28px;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .zone-master-link:hover .zone-master-icon {
+        transform: scale(1.1);
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .zone-text-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .zone-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        color: #2c3e50;
+        transition: color 0.3s ease;
+    }
+
+    .zone-subtitle {
+        font-size: 13px;
+        color: #6c757d;
+        margin: 0;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+
+    .zone-master-link:hover .zone-title {
+        color: #0d6efd;
+    }
+
+    .zone-master-link:hover .zone-subtitle {
+        opacity: 1;
+        color: #495057;
+    }
+
+    .zone-arrow {
+        font-size: 14px;
+        color: #6c757d;
+        transition: all 0.3s ease;
+        opacity: 0.6;
+    }
+
+    .zone-master-link:hover .zone-arrow {
+        opacity: 1;
+        color: #0d6efd;
+        transform: translateX(3px);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .zone-master-link {
+            padding: 12px 15px;
+            gap: 12px;
+        }
+        
+        .zone-icon-container {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .zone-master-icon {
+            font-size: 24px;
+        }
+        
+        .zone-title {
+            font-size: 16px;
+        }
+        
+        .zone-subtitle {
+            font-size: 12px;
+        }
+    }
+
+    /* Animation for page load */
+    .zone-master-link {
+        animation: slideInLeft 0.6s ease-out;
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Pulse effect for attention */
+    .zone-master-link:hover .zone-icon-container {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1.1) rotate(5deg);
+        }
+        50% {
+            transform: scale(1.15) rotate(5deg);
+        }
+    }
+</style>
+
+<!-- Zone Master Link -->
+<a href="/Zone" class="zone-master-link">
+    <div class="zone-icon-container">
+        <i class="fas fa-globe-asia zone-master-icon"></i>
+    </div>
+    <div class="zone-text-container">
+        <span class="zone-title">Zone Master</span>
+        <span class="zone-subtitle">Manage geographical zones</span>
+    </div>
+    <i class="fas fa-chevron-right zone-arrow"></i>
+</a>
+
+<!-- Role Master Link -->
+<a href="/Role" class="zone-master-link">
+    <div class="zone-icon-container">
+        <i class="fas fa-user-shield zone-master-icon"></i>
+    </div>
+    <div class="zone-text-container">
+        <span class="zone-title">Role Master</span>
+        <span class="zone-subtitle">Manage user roles</span>
+    </div>
+    <i class="fas fa-chevron-right zone-arrow"></i>
+</a>
+
+<!-- Operation Master Link -->
+<a href="/Operation" class="zone-master-link">
+    <div class="zone-icon-container">
+        <i class="fas fa-cogs zone-master-icon"></i>
+    </div>
+    <div class="zone-text-container">
+        <span class="zone-title">Operation Master</span>
+        <span class="zone-subtitle">Manage system operations</span>
+    </div>
+    <i class="fas fa-chevron-right zone-arrow"></i>
+</a>
+
+<!-- Discussion Type Master Link -->
+<a href="/DiscussionType" class="zone-master-link">
+    <div class="zone-icon-container">
+        <i class="fas fa-comments zone-master-icon"></i>
+    </div>
+    <div class="zone-text-container">
+        <span class="zone-title">Discussion Type</span>
+        <span class="zone-subtitle">Manage discussion categories</span>
+    </div>
+    <i class="fas fa-chevron-right zone-arrow"></i>
+</a>
+
+<!-- Meeting Type Master Link -->
+<a href="/MeetingType" class="zone-master-link">
+    <div class="zone-icon-container">
+        <i class="fas fa-handshake zone-master-icon"></i>
+    </div>
+    <div class="zone-text-container">
+        <span class="zone-title">Meeting Type</span>
+        <span class="zone-subtitle">Manage meeting types</span>
+    </div>
+    <i class="fas fa-chevron-right zone-arrow"></i>
+</a>
+
+
+
+

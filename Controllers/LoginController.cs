@@ -57,8 +57,8 @@ namespace DMCPortal.Web.Controllers
                     new Claim("SessionId", result.SessionId.ToString()),
                       new Claim("FirstName", result.FirstName ?? ""),
 
-    new Claim("LastName", result.LastName ?? ""),
-        new Claim("UserId", result.UserId.ToString()),
+            new Claim("LastName", result.LastName ?? ""),
+                new Claim("UserId", result.UserId.ToString()),
             new Claim("FullName", fullName)
                 };
 

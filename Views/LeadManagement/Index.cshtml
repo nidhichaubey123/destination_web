@@ -116,7 +116,7 @@
         .content-area {
             flex: 1;
             padding: 20px;
-            overflow-y: auto;
+            overflow-y : none !important;
         }
 
         .main-container {
@@ -154,13 +154,13 @@
 
         .modal-content {
             max-height: 90vh;
-            overflow-y: auto;
+          
         }
         .modal.right.show .modal-dialog {
             transform: translateX(0);
         }
 
-        .modal.right .modal-content {
+        .modal.right  {
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -168,9 +168,14 @@
         }
 
         .modal.right .modal-body {
-            overflow-y: auto;
+         
             flex-grow: 1;
         }
+
+        .modal-content {
+    height: auto;
+    max-height: none;
+}
 
     </style>
 </head>
@@ -339,8 +344,9 @@
 
     <!-- Add New Lead Modal -->
     <div class="modal fade" id="addLeadModal" tabindex="-1" aria-labelledby="addLeadModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xxl modal-dialog-scrollable">
-            <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+        <div class="modal-dialog modal-xxl">
+            <div class="modal-content">
+          
                 <form id="leadForm" action="/LeadManagement/Create" method="post" class="needs-validation">
                     <div class="modal-header">
                         <h5 class="modal-title" id="leadModalTitle">Add New Lead</h5>
@@ -477,7 +483,7 @@
 
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editLeadModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xxl modal-dialog-scrollable">
-            <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+            <div class="modal-content" style="max-height: 90vh; ">
                 <form id="editLeadForm" onsubmit="return updateLead(event)">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Lead</h5>

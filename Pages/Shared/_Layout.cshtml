@@ -176,29 +176,16 @@
                 👤 User Management
             </a>
 
-         <a href="@Url.Action("Index", "Role")"
-   class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Role" ? "active" : "")">
-    🛡️ Role Management
-</a>
-
-            <a href="@Url.Action("Index", "Operation")"
-               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Operation" ? "active" : "")">
-                ⚙️ Operation Management
-            </a>
-
-            <a href="@Url.Action("Index", "DiscussionType")"
-               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "DiscussionType" ? "active" : "")">
-                💬 Discussion Type
-            </a>
-
-            <a href="@Url.Action("Index", "MeetingType")"
-               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "MeetingType" ? "active" : "")">
-                📝 Meeting Type
-            </a>
+       
 
             <a href="@Url.Action("Index", "SalesVisit")"
                class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "SalesVisit" ? "active" : "")">
                 🚗 Sales Visit
+            </a>
+
+            <a href="@Url.Action("Index", "Master")"
+               class="list-group-item list-group-item-action @(ViewContext.RouteData.Values["Controller"].ToString() == "Master" ? "active" : "")">
+                🗂️ Master Pages
             </a>
         </div>
 
