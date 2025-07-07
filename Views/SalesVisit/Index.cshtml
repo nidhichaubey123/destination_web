@@ -187,8 +187,8 @@
             <h4>Sales Visit Management</h4>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">+ Add Sales Visit</button>
         </div>
-        <form id="searchForm" class="d-flex mb-3 gap-2">
-            <input type="text" id="searchBox" class="form-control" placeholder="Search by Visit Code, Venue, Notes">
+        <form id="searchForm" class="d-flex mb-3 gap-2" style="width:30%;">
+            <input type="text" id="searchBox" class="form-control" placeholder="Search Visit..">
             <button type="submit" class="btn btn-success">Search</button>
         </form>
 
@@ -228,9 +228,8 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>User Name</th>
-                    <th>Visit Date</th>
-                    <th>Visit Time</th>
+              <th>User Name</th>
+                    <th>Visit Date & Time</th>
                     <th>Visit Code</th>
                     <th>Meeting Type</th>
                     <th>Discussion Type</th>
@@ -243,9 +242,9 @@
             </tbody>
 
         </table>
-
+        <div id="pagination" class="mt-3 d-flex flex-wrap"></div>
         <!-- Pagination -->
-        <div class="mt-3">
+    @*     <div class="mt-3">
             @for (int i = 1; i <= Model.TotalPages; i++)
             {
                 <a asp-action="Index" asp-route-page="@i" asp-route-search="@Model.SearchTerm"
@@ -253,7 +252,7 @@
                     @i
                 </a>
             }
-        </div>
+        </div> *@
     </div>
 
     <!-- Add Modal -->
@@ -908,8 +907,7 @@
                     const dateOnly = v.visitDate?.split('T')[0] || '';
                     html += `<tr>
                         <td>${v.userName}</td>
-                        <td>${dateOnly}</td>
-                        <td>${v.visitTime}</td>
+                           <td>${dateOnly} ${v.visitTime}</td>
                         <td>${v.salesVisitCode}</td>
                         <td>${v.meetingTypeName}</td>
                         <td>${v.discussionTypeName}</td>

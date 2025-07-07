@@ -33,9 +33,11 @@
     }
 
     <style>
-        body {
-            background-color: #f8f9fa;
+        html, body {
+            height: 100%;
+            overflow: hidden;
         }
+
 
         .alert-success {
             border: none;
@@ -116,8 +118,9 @@
         .content-area {
             flex: 1;
             padding: 20px;
-            overflow-y : none !important;
+            overflow-y: auto;
         }
+
 
         .main-container {
             display: flex;
@@ -154,8 +157,9 @@
 
         .modal-content {
             max-height: 90vh;
-          
+            overflow-y: auto;
         }
+
         .modal.right.show .modal-dialog {
             transform: translateX(0);
         }
