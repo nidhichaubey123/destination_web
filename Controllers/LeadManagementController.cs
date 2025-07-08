@@ -160,24 +160,22 @@ namespace DMCPortal.Web.Controllers
         {
             try
             {
-                var apiUrl = $"{_apiSettings.BaseUrl}/api/leads/{id}";
+                var loggedInUser = User.Identity?.Name ?? "System";
+                var apiUrl = $"{_apiSettings.BaseUrl}/api/leads/{id}?deletedBy={loggedInUser}";
 
                 var response = await _httpClient.DeleteAsync(apiUrl);
 
                 if (response.IsSuccessStatusCode)
-                {
                     return Ok();
-                }
-                else
-                {
-                    return StatusCode(500, "Deletion failed. API responded with error.");
-                }
+
+                return StatusCode(500, "Deletion failed.");
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Server error: {ex.Message}");
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> Update([FromBody] Lead model)
         {

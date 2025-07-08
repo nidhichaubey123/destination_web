@@ -33,6 +33,10 @@
         public string? ReminderOverdue { get; set; }
         public string? QueryCode { get; set; }
         public string? HandledBy { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedOn { get; set; }
+        public string? DeletedBy { get; set; }
+
     }
 
 }

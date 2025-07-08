@@ -29,15 +29,28 @@ namespace DMCPortal.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(string ZoneName)
         {
-            var payload = JsonSerializer.Serialize(new { ZoneName, ZoneCreatedBy = User.Identity?.Name ?? "Admin" });
+            var payload = JsonSerializer.Serialize(new { ZoneName = ZoneName.Trim(), ZoneCreatedBy = User.Identity?.Name ?? "Admin" });
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync("api/Zone", content);
-            TempData[response.IsSuccessStatusCode ? "SuccessMessage" : "ErrorMessage"] =
-                response.IsSuccessStatusCode ? "Zone created successfully!" : "Error creating zone";
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["SuccessMessage"] = "Zone created successfully!";
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                TempData["ErrorMessage"] = "This Zone already exists.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Error creating Zone.";
+            }
 
             return RedirectToAction(nameof(Index));
         }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ZoneEditModel model)
@@ -46,7 +59,7 @@ namespace DMCPortal.Web.Controllers
             {
                 var apiPayload = new
                 {
-                    ZoneName = model.ZoneName,
+                    ZoneName = model.ZoneName.Trim(),
                     ZoneUpdatedBy = model.UpdatedBy
                 };
 
@@ -58,6 +71,10 @@ namespace DMCPortal.Web.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     TempData["SuccessMessage"] = "Zone updated successfully!";
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                {
+                    TempData["ErrorMessage"] = "This Zone name already exists.";
                 }
                 else
                 {
