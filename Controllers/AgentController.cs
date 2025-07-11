@@ -98,6 +98,9 @@ namespace DMCPortal.Web.Controllers
                     }
                 }
 
+                // ✅ FIXED: Generate AppSheetId before saving
+                agent.AppSheetId = Guid.NewGuid().ToString();
+
                 // Step 3: Proceed to save
                 var json = JsonSerializer.Serialize(agent);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -155,14 +158,28 @@ namespace DMCPortal.Web.Controllers
         {
             try
             {
-                // Step 1: Fetch all agents
+                // Step 1: Get the existing agent to preserve AppSheetId
+                var existingAgentResponse = await _httpClient.GetAsync($"api/Agent/{agent.AgentId}");
+                if (!existingAgentResponse.IsSuccessStatusCode)
+                {
+                    TempData["ErrorMessage"] = "Agent not found.";
+                    return RedirectToAction("Index");
+                }
+
+                var existingAgentJson = await existingAgentResponse.Content.ReadAsStringAsync();
+                var existingAgent = JsonSerializer.Deserialize<Agent>(existingAgentJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // ✅ FIXED: Preserve the existing AppSheetId
+                agent.AppSheetId = existingAgent.AppSheetId;
+
+                // Step 2: Fetch all agents for duplicate check
                 var getResponse = await _httpClient.GetAsync("api/Agent");
                 if (getResponse.IsSuccessStatusCode)
                 {
                     var jsonData = await getResponse.Content.ReadAsStringAsync();
                     var existingAgents = JsonSerializer.Deserialize<List<Agent>>(jsonData, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    // Step 2: Check for duplicates excluding current agent
+                    // Step 3: Check for duplicates excluding current agent
                     bool duplicate = existingAgents.Any(a =>
                         a.AgentId != agent.AgentId && (
                             a.AgentName.Equals(agent.AgentName, StringComparison.OrdinalIgnoreCase) ||
@@ -177,7 +194,7 @@ namespace DMCPortal.Web.Controllers
                     }
                 }
 
-                // Step 3: Proceed to update
+                // Step 4: Proceed to update
                 var json = JsonSerializer.Serialize(agent);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -185,6 +202,8 @@ namespace DMCPortal.Web.Controllers
 
                 if (response.IsSuccessStatusCode)
                 {
+                    // ✅ Update AppSheet when local update is successful
+                    await UpdateAgentInAppSheet(agent);
                     TempData["SuccessMessage"] = "Agent updated successfully.";
                 }
                 else
@@ -201,8 +220,6 @@ namespace DMCPortal.Web.Controllers
             return RedirectToAction("Index");
         }
 
-
-
         private async Task SendAgentToAppSheet(Agent agent)
         {
             var appId = "af9afc6d-2f67-4d93-a122-06b5eb261d22";
@@ -218,7 +235,7 @@ namespace DMCPortal.Web.Controllers
                 {
             new
             {
-              AppSheetId = Guid.NewGuid().ToString(),
+              AppSheetId = agent.AppSheetId, // ✅ FIXED: Use the same AppSheetId from agent
                 AgentName = agent.AgentName,
                 AgentPoc1 = agent.AgentPoc1,
                 Agency_Company = agent.Agency_Company,
@@ -247,5 +264,70 @@ namespace DMCPortal.Web.Controllers
             }
         }
 
+        // ✅ NEW: Update agent in AppSheet
+        private async Task UpdateAgentInAppSheet(Agent agent)
+        {
+            try
+            {
+                // Check if agent has AppSheetId - if not, we can't update in AppSheet
+                if (string.IsNullOrEmpty(agent.AppSheetId))
+                {
+                    Console.WriteLine("⚠️ Agent has no AppSheetId - skipping AppSheet update");
+                    return;
+                }
+
+                var appId = "af9afc6d-2f67-4d93-a122-06b5eb261d22";
+                var apiKey = "V2-7PseE-MsP0e-11oP9-JPY4t-53I87-0gtaN-hliEm-xiAEN";
+                var tableName = "row1";
+                var url = $"https://api.appsheet.com/api/v2/apps/{appId}/tables/{tableName}/Action";
+
+                var payload = new
+                {
+                    Action = "Edit",
+                    Properties = new { Locale = "en-US" },
+                    Rows = new[]
+                    {
+                        new
+                        {
+                            AppSheetId = agent.AppSheetId,
+                            AgentName = agent.AgentName,
+                            AgentPoc1 = agent.AgentPoc1,
+                            Agency_Company = agent.Agency_Company,
+                            phoneno = agent.phoneno,
+                            emailAddress = agent.emailAddress,
+                            Zone = agent.Zone,
+                            AgentAddress = agent.AgentAddress
+                        }
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                content.Headers.Add("ApplicationAccessKey", apiKey);
+
+                using var client = new HttpClient();
+                var response = await client.PostAsync(url, content);
+                var result = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine("📢 AppSheet Update Response:");
+                Console.WriteLine($"Status: {response.StatusCode}");
+                Console.WriteLine($"Response: {result}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"⚠️ AppSheet update failed: {response.StatusCode} - {result}");
+                    // Log the error but don't throw exception since local update was successful
+                }
+                else
+                {
+                    Console.WriteLine("✅ AppSheet update successful!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Exception in AppSheet update: {ex.Message}");
+                // Don't throw - local update was successful
+            }
+        }
     }
 }
