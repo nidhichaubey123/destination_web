@@ -2,6 +2,7 @@
 
 using DMCPortal.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
@@ -25,14 +26,25 @@ namespace DMCPortal.Web.Controllers
             try
             {
                 int pageSize = 10;
-                var apiUrl = $"{_apiSettings.BaseUrl}/api/leads?search={search}&page={page}&pageSize={pageSize}";
-                var response = await _httpClient.GetAsync(apiUrl);
+                var leadApiUrl = $"{_apiSettings.BaseUrl}/api/leads?search={search}&page={page}&pageSize={pageSize}";
+                var zoneApiUrl = $"{_apiSettings.BaseUrl}/api/Zone";
 
-                if (response.IsSuccessStatusCode)
+                // Call both APIs in parallel
+                var leadTask = _httpClient.GetAsync(leadApiUrl);
+                var zoneTask = _httpClient.GetAsync(zoneApiUrl);
+
+                await Task.WhenAll(leadTask, zoneTask);
+
+                var leadResponse = leadTask.Result;
+                var zoneResponse = zoneTask.Result;
+
+                var viewModel = new PaginatedLeadViewModel();
+
+                // Handle leads
+                if (leadResponse.IsSuccessStatusCode)
                 {
-                    var jsonString = await response.Content.ReadAsStringAsync();
-
-                    var result = JsonSerializer.Deserialize<LeadApiResponse>(jsonString, new JsonSerializerOptions
+                    var leadJson = await leadResponse.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<LeadApiResponse>(leadJson, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
@@ -72,23 +84,31 @@ namespace DMCPortal.Web.Controllers
                         HandledBy = q.HandledBy
                     }).ToList();
 
-                    int totalPages = (int)Math.Ceiling(result.TotalRecords / (double)pageSize);
+                    viewModel.Leads = allLeads;
+                    viewModel.CurrentPage = page;
+                    viewModel.TotalPages = (int)Math.Ceiling(result.TotalRecords / (double)pageSize);
+                    viewModel.SearchTerm = search;
+                }
 
-                    var viewModel = new PaginatedLeadViewModel
+                // Handle zones
+                if (zoneResponse.IsSuccessStatusCode)
+                {
+                    var zoneJson = await zoneResponse.Content.ReadAsStringAsync();
+                    var zones = JsonSerializer.Deserialize<List<Zone>>(zoneJson, new JsonSerializerOptions
                     {
-                        Leads = allLeads,
-                        CurrentPage = page,
-                        TotalPages = totalPages,
-                        SearchTerm = search
-                    };
+                        PropertyNameCaseInsensitive = true
+                    });
 
-                    return View(viewModel);
+                    ViewBag.ZoneList = zones
+                        .Select(z => new SelectListItem { Text = z.ZoneName, Value = z.ZoneName }) // Or use z.ZoneId if needed
+                        .ToList();
                 }
                 else
                 {
-                    TempData["Error"] = "Unable to load leads.";
-                    return View(new PaginatedLeadViewModel());
+                    ViewBag.ZoneList = new List<SelectListItem>();
                 }
+
+                return View(viewModel);
             }
             catch
             {

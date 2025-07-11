@@ -7,7 +7,7 @@ namespace DMCPortal.Web.Models
   
         public int AgentId { get; set; }
 
-      
+      public string? AppSheetId { get; set; }
 
         public string AgentName { get; set; }
 
@@ -21,6 +21,11 @@ namespace DMCPortal.Web.Models
         public string Zone { get; set; }
 
         public string AgentAddress { get; set; }
+
+        public bool? IsDeleted { get; set; }
+        public string? DeletedBy { get; set; }
+        public DateTime? DeletedOn { get; set; }
+
 
     }
 

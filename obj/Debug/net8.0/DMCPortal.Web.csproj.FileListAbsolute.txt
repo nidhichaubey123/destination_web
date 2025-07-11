@@ -227,3 +227,9 @@ D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\ref
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.pdb
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\DMCPortal.Web.genruntimeconfig.cache
 D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\obj\Debug\net8.0\ref\DMCPortal.Web.dll
+D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\bin\Debug\net8.0\Google.Apis.dll
+D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\bin\Debug\net8.0\Google.Apis.Auth.dll
+D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\bin\Debug\net8.0\Google.Apis.Core.dll
+D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\bin\Debug\net8.0\Google.Apis.Sheets.v4.dll
+D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\bin\Debug\net8.0\System.Management.dll
+D:\Work Folder\Truvai\DMC\truvaidmcportal-web\DMCPortal.Web\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll

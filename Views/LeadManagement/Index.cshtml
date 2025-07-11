@@ -375,7 +375,13 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Zone</label>
-                            <input name="Zone" type="text" class="form-control" required />
+                        <select name="Zone" class="form-select" id="addZone" required>
+                            <option value="">-- Select Zone --</option>
+                            @foreach (var zone in ViewBag.ZoneList as List<SelectListItem>)
+                            {
+                                <option value="@zone.Value">@zone.Text</option>
+                            }
+                        </select>
                             <div class="invalid-feedback">Zone is required.</div>
                         </div>
 
@@ -503,8 +509,14 @@
 
                         <div class="col-md-6">
                             <label>Zone:</label>
-                            <input type="text" id="editZone" name="Zone" class="form-control">
-                        </div>
+                        <select name="Zone" class="form-select" id="editZone" required>
+                            <option value="">-- Select Zone --</option>
+                            @foreach (var zone in ViewBag.ZoneList as List<SelectListItem>)
+                            {
+                                <option value="@zone.Value">@zone.Text</option>
+                            }
+                        </select>
+                    </div>
                         <div class="col-md-6">
                             <label>Destination:</label>
                             <input type="text" id="editDestination" name="Destination" class="form-control" required>
