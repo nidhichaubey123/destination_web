@@ -232,19 +232,20 @@ namespace DMCPortal.Web.Controllers
                 Action = "Add",
                 Properties = new { Locale = "en-US" },
                 Rows = new[]
-                {
-            new
-            {
-              AppSheetId = agent.AppSheetId, // ✅ FIXED: Use the same AppSheetId from agent
-                AgentName = agent.AgentName,
-                AgentPoc1 = agent.AgentPoc1,
-                Agency_Company = agent.Agency_Company,
-                phoneno = agent.phoneno,
-                emailAddress = agent.emailAddress,
-                Zone = agent.Zone,
-                AgentAddress = agent.AgentAddress
-            }
-        }
+{
+    new
+    {
+        AppSheetId = agent.AppSheetId,
+        AgentName = agent.AgentName,
+        AgentPoc1 = agent.AgentPoc1,
+        Agency_Company = agent.Agency_Company,
+        phoneno = agent.phoneno,
+        emailAddress = agent.emailAddress,
+        Zone = agent.Zone,
+        AgentAddress = agent.AgentAddress
+    }
+}
+
             };
 
             var json = JsonSerializer.Serialize(payload);
@@ -286,20 +287,21 @@ namespace DMCPortal.Web.Controllers
                     Action = "Edit",
                     Properties = new { Locale = "en-US" },
                     Rows = new[]
-                    {
-                        new
-                        {
-                            AppSheetId = agent.AppSheetId,
-                            AgentName = agent.AgentName,
-                            AgentPoc1 = agent.AgentPoc1,
-                            Agency_Company = agent.Agency_Company,
-                            phoneno = agent.phoneno,
-                            emailAddress = agent.emailAddress,
-                            Zone = agent.Zone,
-                            AgentAddress = agent.AgentAddress
-                        }
-                    }
+          {
+        new Dictionary<string, object>
+        {
+            ["AppSheetId"] = agent.AppSheetId,
+            ["AGENCY_ContactNAME"] = agent.AgentName,
+            ["Agent POC 1"] = agent.AgentPoc1,
+            ["Agency_Company"] = agent.Agency_Company,
+            ["Phone Number"] = agent.phoneno,
+            ["Email address"] = agent.emailAddress,
+            ["Agent Zone"] = agent.Zone,
+            ["Agent Address"] = agent.AgentAddress
+        }
+    }
                 };
+
 
                 var json = JsonSerializer.Serialize(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
